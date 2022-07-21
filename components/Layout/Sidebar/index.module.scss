@@ -38,6 +38,22 @@
                 font-size: 1.6rem;
                 position: relative;
 
+                &:hover {
+                    color: #fff;
+                    background-color: rgba(0, 0, 0, 0.22);
+                }
+                &:before {
+                    content: '';
+                    position: absolute;
+                    width: 4px;
+                    height: 4px;
+                    border-radius: 50%;
+                    left: 26px;
+                    top: 40px;
+                    background-color: hsla(0, 0%, 100%, 0.2);
+                    transition: background-color 0.1s ease-in;
+                }
+
                 .SidebarLink__anchor {
                     padding: 3rem 0;
                     display: block;
@@ -53,30 +69,13 @@
                 }
             }
 
-            ul .SidebarLink:hover {
-                color: #fff;
-                background-color: rgba(0, 0, 0, 0.22);
-            }
-
-            ul .SidebarLink::before {
-                content: '';
-                position: absolute;
-                width: 4px;
-                height: 4px;
-                border-radius: 50%;
-                left: 26px;
-                top: 40px;
-                background-color: hsla(0, 0%, 100%, 0.2);
-                transition: background-color 0.1s ease-in;
-            }
-
             ul .SidebarLink__active {
                 color: #fff;
                 background-color: rgba(0, 0, 0, 0.22);
-            }
 
-            ul .SidebarLink__active::before {
-                background-color: #fff;
+                &:before {
+                    background-color: #fff;
+                }
             }
         }
     }

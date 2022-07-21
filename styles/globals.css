@@ -4,6 +4,17 @@ body {
     font-family: Roboto, Apple SD Gothic Neo, sans-serif;
 }
 
+body *,
+body :after,
+body :before {
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -moz-text-size-adjust: none;
+    text-size-adjust: none;
+    -webkit-text-size-adjust: none;
+}
+
 #root,
 body,
 html {

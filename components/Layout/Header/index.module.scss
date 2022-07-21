@@ -14,6 +14,13 @@
             url('https://baobab.scope.klaytn.com/icons/icon-network-white.svg');
         transition: border-color 0.1s ease-in;
 
+        &:hover {
+            border: 1px solid hsla(0, 0%, 100%, 1);
+            .Header__dropdownMenu_arrow {
+                border-color: #fff transparent transparent;
+            }
+        }
+
         .Header__dropdownMenu__control {
             cursor: pointer;
             position: relative;
@@ -22,7 +29,7 @@
             font-size: 1.2rem;
             font-weight: 700;
             line-height: 1.5rem;
-            width: 13.8rem;
+            width: 18.8rem;
             //height: 3.8rem;
             padding: 1.2rem 0 1.2rem 4.1rem;
             color: #fff;
@@ -77,27 +84,20 @@
                 color: #6ad1ba;
                 font-size: 12px;
                 font-weight: 400;
-            }
 
-            .is__selected::before {
-                content: '';
-                position: absolute;
-                top: 50%;
-                left: 24px;
-                display: inline-block;
-                width: 6px;
-                height: 6px;
-                margin-top: -4px;
-                border-radius: 50%;
-                background-color: #6ad1ba;
+                &:before {
+                    content: '';
+                    position: absolute;
+                    top: 50%;
+                    left: 24px;
+                    display: inline-block;
+                    width: 6px;
+                    height: 6px;
+                    margin-top: -4px;
+                    border-radius: 50%;
+                    background-color: #6ad1ba;
+                }
             }
-        }
-    }
-
-    .Header__dropdownMenu:hover {
-        border: 1px solid hsla(0, 0%, 100%, 1);
-        .Header__dropdownMenu_arrow {
-            border-color: #fff transparent transparent;
         }
     }
 
