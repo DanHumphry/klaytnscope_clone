@@ -2,7 +2,7 @@ import cx from 'classnames';
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { setNetwork } from 'redux/action/actions';
-import { RootState } from 'redux/reducers/reducers';
+import { RootState } from 'redux/reducers';
 import css from './index.module.scss';
 
 const Header = () => {

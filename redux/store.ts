@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { createStore, applyMiddleware, EmptyObject, Store } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
 import thunkMiddleware from 'redux-thunk';
-import { rootReducer } from 'redux/reducers/reducers';
+import { rootReducer } from 'redux/reducers';
 
 let store:
     | (Store<

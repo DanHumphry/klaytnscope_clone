@@ -1,9 +1,28 @@
 import cx from 'classnames';
 import type { NextPage } from 'next';
 import Link from 'next/link';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { setSocket } from 'redux/action/actions';
+import { RootState } from 'redux/reducers';
+import { webSocketHost } from 'utils/variables';
 import css from './index.module.scss';
 
 const Home: NextPage = () => {
+    const dispatch = useDispatch();
+    const { wss } = useSelector((state: RootState) => state.networkReducer);
+
+    useEffect(() => {
+        dispatch(setSocket(new WebSocket(webSocketHost)));
+    }, []);
+
+    useEffect(() => {
+        if (wss) {
+            // @ts-ignore
+            wss.sendMessage('ping', 'dan test');
+        }
+    }, [wss]);
+
     return (
         <main className={css.Home}>
             <div className={css.Home__mainPage}>
@@ -17,7 +36,7 @@ const Home: NextPage = () => {
                             />
                         </div>
                         <button className={css.SearchButton} type="button">
-                            submit button
+                            submit buttontxhash
                         </button>
                     </div>
                 </div>
