@@ -1,10 +1,6 @@
 import * as types from '../types';
+import { Block } from 'utils/websocket.client';
 
-// request action -> suc action or fail action (thunk 쓰는 이유)
-export const setNetwork = (payload: { selectedNetwork: string; othersNetworks: string[] }) => (dispatch: any) => {
-    dispatch({ type: types.SET_NETWORK, payload: payload });
-};
-
-export const setSocket = (_wss: WebSocket) => (dispatch: any) => {
-    dispatch({ type: types.INIT_WEBSOCKET, payload: { wss: _wss } });
+export const setBlockHeader = (payload: { blockHeader: Block }) => (dispatch: any) => {
+    dispatch({ type: types.SET_BLOCK_HEADER, payload });
 };

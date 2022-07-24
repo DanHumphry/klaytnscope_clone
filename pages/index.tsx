@@ -1,27 +1,44 @@
 import cx from 'classnames';
 import type { NextPage } from 'next';
 import Link from 'next/link';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { setSocket } from 'redux/action/actions';
+
+import { setBlockHeader } from 'redux/action/actions';
 import { RootState } from 'redux/reducers';
-import { webSocketHost } from 'utils/variables';
+import { convertToAge, convertToKlayByFixed } from 'utils/commonJS';
 import css from './index.module.scss';
+import { Block, Txs } from 'utils/websocket.client';
 
 const Home: NextPage = () => {
     const dispatch = useDispatch();
-    const { wss } = useSelector((state: RootState) => state.networkReducer);
+    const { wss, blockHeader } = useSelector((state: RootState) => state.networkReducer);
+
+    const [blocks, setBlocks] = useState<{ blocks: Block[]; txs: Txs[]; lastBlockNumber: number }>({
+        blocks: [],
+        txs: [],
+        lastBlockNumber: 0,
+    });
 
     useEffect(() => {
-        dispatch(setSocket(new WebSocket(webSocketHost)));
+        if (!wss) return;
+
+        setBlocks({ blocks: wss.blocks.slice(-11), txs: wss.txs.slice(-11), lastBlockNumber: blockHeader.number || 0 });
+
+        wss.addEvent('newBlockHeader', () => {
+            dispatch(setBlockHeader({ blockHeader: wss.blocks[wss.blocks.length - 1] }));
+        });
+
+        return () => {
+            wss.removeEvent('newBlockHeader');
+        };
     }, []);
 
     useEffect(() => {
-        if (wss) {
-            // @ts-ignore
-            wss.sendMessage('ping', 'dan test');
-        }
-    }, [wss]);
+        if (!wss || !blockHeader) return;
+
+        setBlocks({ blocks: wss.blocks.slice(-11), txs: wss.txs.slice(-11), lastBlockNumber: blockHeader.number });
+    }, [blockHeader]);
 
     return (
         <main className={css.Home}>
@@ -46,7 +63,7 @@ const Home: NextPage = () => {
                             <h2 className={css.main__box__title}>Block Height</h2>
                             <div className={css.blockHeight_view}>
                                 <img src="https://baobab.scope.klaytn.com/icons/icon-block-nor.svg" />
-                                #96847887
+                                {`# ${blocks.lastBlockNumber || ''}`}
                             </div>
                             <p className={css.blockHeight_message}>
                                 Klaytn builds consensus among reputable enterprises across the world.
@@ -94,38 +111,55 @@ const Home: NextPage = () => {
                                             </div>
                                         </div>
                                         <div className={css.Table__tbody}>
-                                            <div className={css.Table__tr}>
-                                                <div className={cx(css.Table__td, css.MainList__table__number)}>
-                                                    <span className={css.numberData}>96847887</span>
-                                                </div>
-                                                <div className={cx(css.Table__td, css.MainList__table__timestamp)}>
-                                                    <span className={css.TimeDelta}>18 secs ago</span>
-                                                </div>
-                                                <div className={cx(css.Table__td, css.MainList__table__totalTx)}>
-                                                    <span className={css.numberData}>0</span>
-                                                </div>
-                                                <div className={cx(css.Table__td, css.MainList__table__proposer)}>
-                                                    <div
-                                                        className={cx(
-                                                            css.CroppedTxWithLink,
-                                                            css.CroppedTxWithLink__address,
-                                                        )}
-                                                    >
-                                                        <a href="/contract/0x5cb1a7dccbd0dc446e3640898ede8820368554c8">
-                                                            GC: Baobab GroundX 3
-                                                        </a>
+                                            {[...blocks.blocks].reverse().map((item) => {
+                                                return (
+                                                    <div className={css.Table__tr} key={item.number}>
+                                                        <div className={cx(css.Table__td, css.MainList__table__number)}>
+                                                            <span className={css.numberData}>{item.number}</span>
+                                                        </div>
+                                                        <div
+                                                            className={cx(
+                                                                css.Table__td,
+                                                                css.MainList__table__timestamp,
+                                                            )}
+                                                        >
+                                                            <span className={css.TimeDelta}>
+                                                                {convertToAge(item.timestamp)}
+                                                            </span>
+                                                        </div>
+                                                        <div
+                                                            className={cx(css.Table__td, css.MainList__table__totalTx)}
+                                                        >
+                                                            <span className={css.numberData}>{item.txs.length}</span>
+                                                        </div>
+                                                        <div
+                                                            className={cx(css.Table__td, css.MainList__table__proposer)}
+                                                        >
+                                                            <div
+                                                                className={cx(
+                                                                    css.CroppedTxWithLink,
+                                                                    css.CroppedTxWithLink__address,
+                                                                )}
+                                                            >
+                                                                <a href="/contract/0x5cb1a7dccbd0dc446e3640898ede8820368554c8">
+                                                                    {item.proposerName}
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                        <div
+                                                            className={cx(
+                                                                css.Table__td,
+                                                                css.Table__td__right,
+                                                                css.MainList__table__reward,
+                                                            )}
+                                                        >
+                                                            <span className={css.numberData}>
+                                                                {convertToKlayByFixed(item.reward)}
+                                                            </span>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div
-                                                    className={cx(
-                                                        css.Table__td,
-                                                        css.Table__td__right,
-                                                        css.MainList__table__reward,
-                                                    )}
-                                                >
-                                                    <span className={css.numberData}>NULL</span>
-                                                </div>
-                                            </div>
+                                                );
+                                            })}
                                         </div>
                                     </div>
                                 </div>
@@ -165,45 +199,56 @@ const Home: NextPage = () => {
                                         </div>
 
                                         <div className={css.Table__tbody}>
-                                            <div className={css.Table__tr}>
-                                                <div className={cx(css.Table__td, css.MainList__table__txHash)}>
-                                                    <div className={css.CroppedTxWithLink}>
-                                                        <a href="/tx/0x274b61716313d24f20ef1d5f3fd32cec03bcd90207fa9cdbe9544b0377aac8ef">
-                                                            0x274b61716313d24f20ef1d5f3fd32cec03bcd90207fa9cdbe9544b0377aac8ef
-                                                        </a>
-                                                    </div>
-                                                </div>
-                                                <div className={cx(css.Table__td, css.MainList__table__timestamp_th)}>
-                                                    <span className={css.TimeDelta}>18 secs ago</span>
-                                                </div>
-                                                <div className={cx(css.Table__td, css.MainList__table__fromTo)}>
-                                                    <div className={css.FromTo}>
-                                                        <span className="FromTo__from">
+                                            {[...blocks.txs].reverse().map((item) => {
+                                                return (
+                                                    <div className={css.Table__tr}>
+                                                        <div className={cx(css.Table__td, css.MainList__table__txHash)}>
                                                             <div className={css.CroppedTxWithLink}>
-                                                                <a
-                                                                    className="CroppedTxWithLink__link CroppedTxWithLink__link--success"
-                                                                    href="/account/0x393c0c47b9a6b3f226456a7162086579decc8ae3"
-                                                                >
-                                                                    0x393c0c47b9a6b3f226456a7162086579decc8ae3
+                                                                <a href="/tx/0x274b61716313d24f20ef1d5f3fd32cec03bcd90207fa9cdbe9544b0377aac8ef">
+                                                                    {item.txHash}
                                                                 </a>
                                                             </div>
-                                                        </span>
-                                                        <span
-                                                            className={cx(css.FromTo__arrow, css.white__arrow)}
-                                                        ></span>
-                                                        <span className="FromTo__to">
-                                                            <div className={css.CroppedTxWithLink}>
-                                                                <a
-                                                                    className="CroppedTxWithLink__link CroppedTxWithLink__link--success"
-                                                                    href="/account/0x9e0112a06d12fab3302d72bae44f19f300095907"
-                                                                >
-                                                                    0x9e0112a06d12fab3302d72bae44f19f300095907
-                                                                </a>
+                                                        </div>
+                                                        <div
+                                                            className={cx(
+                                                                css.Table__td,
+                                                                css.MainList__table__timestamp_th,
+                                                            )}
+                                                        >
+                                                            <span className={css.TimeDelta}>
+                                                                {convertToAge(item.timestamp)}
+                                                            </span>
+                                                        </div>
+                                                        <div className={cx(css.Table__td, css.MainList__table__fromTo)}>
+                                                            <div className={css.FromTo}>
+                                                                <span className="FromTo__from">
+                                                                    <div className={css.CroppedTxWithLink}>
+                                                                        <a
+                                                                            className="CroppedTxWithLink__link CroppedTxWithLink__link--success"
+                                                                            href="/account/0x393c0c47b9a6b3f226456a7162086579decc8ae3"
+                                                                        >
+                                                                            {item.from}
+                                                                        </a>
+                                                                    </div>
+                                                                </span>
+                                                                <span
+                                                                    className={cx(css.FromTo__arrow, css.white__arrow)}
+                                                                ></span>
+                                                                <span className="FromTo__to">
+                                                                    <div className={css.CroppedTxWithLink}>
+                                                                        <a
+                                                                            className="CroppedTxWithLink__link CroppedTxWithLink__link--success"
+                                                                            href="/account/0x9e0112a06d12fab3302d72bae44f19f300095907"
+                                                                        >
+                                                                            {item.to}
+                                                                        </a>
+                                                                    </div>
+                                                                </span>
                                                             </div>
-                                                        </span>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </div>
+                                                );
+                                            })}
                                         </div>
                                     </div>
                                 </div>

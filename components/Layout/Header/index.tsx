@@ -1,29 +1,43 @@
 import cx from 'classnames';
-import { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { setNetwork } from 'redux/action/actions';
+import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { RootState } from 'redux/reducers';
 import css from './index.module.scss';
 
 const Header = () => {
-    const { selectedNetwork, othersNetworks } = useSelector((state: RootState) => state.networkReducer);
-    const dispatch = useDispatch();
+    const { wss } = useSelector((state: RootState) => state.networkReducer);
+
+    const router = useRouter();
 
     const [networkTap, setNetworkTap] = useState(false);
+    const [selectNetwork, setSelectNetwork] = useState('');
 
     const _setNetworksHandler = (idx: number) => {
-        const temp = [...othersNetworks];
-        const nextNetwork = temp.splice(idx, 1);
-        temp.unshift(selectedNetwork);
+        if (!wss) return;
 
-        dispatch(setNetwork({ selectedNetwork: nextNetwork[0], othersNetworks: temp }));
+        const network = wss.getNetwork();
+        const temp = [...network.others];
+        const nextNetwork = temp.splice(idx, 1);
+        temp.unshift(network.selected);
+
+        wss.setNetwork({ selected: nextNetwork[0], others: temp });
+        setSelectNetwork(nextNetwork[0]);
+
+        if (router.pathname === '/') wss.sendMessage('setNetwork', '', network.selected);
     };
+
+    useEffect(() => {
+        if (!wss) return;
+
+        setSelectNetwork(wss?.getNetwork().selected);
+    }, []);
 
     return (
         <header className={css.Layout_header}>
             <div className={css.Header__dropdownMenu} onClick={() => setNetworkTap(!networkTap)}>
                 <div className={css.Header__dropdownMenu__control} aria-haspopup="listbox">
-                    <div className="DropdownMenu-placeholder is-selected">{`${selectedNetwork} Network`}</div>
+                    <div className="DropdownMenu-placeholder is-selected">{`${selectNetwork} Network`}</div>
                     <div className="DropdownMenu-arrow-wrapper">
                         <span className={css.Header__dropdownMenu_arrow}></span>
                     </div>
@@ -35,9 +49,9 @@ const Header = () => {
                             role="option"
                             aria-selected="false"
                         >
-                            {`${selectedNetwork} Network`}
+                            {`${selectNetwork} Network`}
                         </div>
-                        {othersNetworks.map((network: string, index: number) => {
+                        {wss?.getNetwork().others.map((network: string, index: number) => {
                             return (
                                 <div
                                     className={css.Header__dropdownMenu__option}

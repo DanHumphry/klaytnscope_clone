@@ -14,7 +14,8 @@
         "jsx": "preserve",
         "incremental": true,
         "baseUrl": ".",
-        "module": "CommonJS"
+        "module": "CommonJS",
+        "allowSyntheticDefaultImports": true
     },
     "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
     "exclude": ["node_modules"]

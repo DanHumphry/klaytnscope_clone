@@ -3,17 +3,18 @@ import { createStore, applyMiddleware, EmptyObject, Store } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
 import thunkMiddleware from 'redux-thunk';
 import { rootReducer } from 'redux/reducers';
+import WebSocketClientModel from 'utils/websocket.client';
 
 let store:
     | (Store<
-          EmptyObject & { counter: number; timer: { lastUpdate: any; light: boolean } },
-          { type: any } | { type: any; payload: any }
+          EmptyObject & {
+              networkReducer: { selectedNetwork: any; othersNetworks: any; wss: WebSocketClientModel | null };
+          },
+          any
       > & { dispatch: unknown })
     | undefined;
 
-function initStore(
-    initialState: { counter?: number | undefined; timer?: { lastUpdate: any; light: boolean } | undefined } | undefined,
-) {
+function initStore(initialState: any) {
     return createStore(rootReducer, initialState, composeWithDevTools(applyMiddleware(thunkMiddleware)));
 }
 

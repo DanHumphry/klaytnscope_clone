@@ -1,37 +1,29 @@
-import { ethers } from 'ethers';
-import { IncomingMessage } from 'http';
-import { Queue } from 'utils/commonJS';
+import { BlockHeader } from 'web3-eth';
 import { WebSocketServer, WebSocket } from 'ws';
 import Caver from 'caver-js';
+import Web3 from 'web3';
+import { v4 as uuidv4 } from 'uuid';
+
+import { Queue } from './commonJS';
+import { committee } from './variables';
 
 declare interface PACKET_LAYAR {
     type: string;
+
+    network: Networks;
+    prevNetwork?: Networks;
+
     data: any;
 }
 
-const cypressEN = 'https://public-node-api.klaytnapi.com/v1/cypress';
+declare interface WebSocket_uuid extends WebSocket {
+    _uuid: string;
+}
+
 const cypressWSEN = 'wss://public-node-api.klaytnapi.com/v1/cypress/ws';
-const baobabEN = 'https://public-node-api.klaytnapi.com/v1/baobab';
 const baobabWSEN = 'wss://public-node-api.klaytnapi.com/v1/baobab/ws';
 
-(async function () {
-    const caver = new Caver(baobabWSEN);
-    const currentBlockNumber = await caver.klay.getBlockNumber();
-    const res = await caver.klay.getBlockWithConsensusInfo(currentBlockNumber);
-    console.log(res);
-
-    // const provider = new ethers.providers.WebSocketProvider(baobabWSEN);
-    //
-    // setInterval(() => {
-    //     provider.getBlockNumber();
-    // }, 10000);
-    //
-    // provider.on('block', (e) => {
-    //     console.log(e);
-    // });
-})();
-
-interface Block {
+declare interface Block {
     number: number;
     timestamp: number;
     totalTx: number;
@@ -43,82 +35,215 @@ interface Block {
         txHash: string;
         timestamp: number;
         from: string;
+        to: string;
         status: number;
         txCategory: string;
         fromName: string;
         toName: string;
+    }[];
+}
+
+enum Networks {
+    baobab = 'Baobab',
+    cypress = 'Cypress',
+}
+
+declare interface Network {
+    blockFinder: BlockFinder;
+    clients: Map<string, WebSocket_uuid>;
+}
+
+class BlockFinder {
+    private network: Networks;
+    private wss: WebSocketServer;
+
+    public collection: Block[] = [];
+    public blockHeader: Block | undefined = undefined;
+    protected collectorTimeoutObj: NodeJS.Timeout | null = null;
+    protected blockWithConsensusInfoQueue: Queue = new Queue();
+
+    protected caver: Caver;
+
+    constructor(provider: { url: string; network: Networks }, wss: WebSocketServer) {
+        this.network = provider.network;
+        this.wss = wss;
+
+        this.caver = new Caver(provider.url);
+
+        this.initialize(provider.url);
+    }
+
+    protected initialize = (wsProvider: string) => {
+        const web3 = new Web3(wsProvider);
+
+        setInterval(() => {
+            web3.eth.getBlockNumber().catch(console.error);
+        }, 10000);
+
+        web3.eth.subscribe('newBlockHeaders').on('data', this.blockListener).on('error', console.error);
+    };
+
+    private blockListener = async (block: BlockHeader) => {
+        const receipts = await this.caver.klay.getBlockWithConsensusInfo(block.number);
+        this.blockWithConsensusInfoQueue.enqueue(receipts);
+
+        if (!this.collectorTimeoutObj) {
+            this.collectorTimeoutObj = setTimeout(this.collector, 0);
+        }
+    };
+
+    private collector = (): Block | undefined => {
+        if (this.blockWithConsensusInfoQueue.getLength() === 0) {
+            this.collectorTimeoutObj = null;
+            return this.blockHeader;
+        }
+
+        const receipts = this.blockWithConsensusInfoQueue.dequeue();
+        const { number, timestamp, transactions, originProposer, gasUsed } = receipts;
+
+        const txs = [];
+
+        for (const tx of transactions) {
+            const { transactionHash, status, from, type, to } = tx;
+            txs.push({
+                txHash: transactionHash,
+                timestamp: +timestamp,
+                from: from,
+                to: to || '',
+                status: +status,
+                txCategory: type,
+                fromName: '',
+                toName: '',
+            });
+        }
+
+        const proposerIdx = committee[0].indexOf(originProposer);
+
+        const block = {
+            number: +number,
+            timestamp: +timestamp,
+            totalTx: transactions.length,
+            proposer: originProposer,
+            reward: 9.6 * 10 ** 18 + 250000000000 * gasUsed + '',
+            gasUsed: gasUsed,
+            proposerName: proposerIdx === -1 ? '' : committee[1][proposerIdx],
+            txs: txs,
+        };
+
+        this.blockHeader = block;
+        this.collection.push(block);
+        this.wss.emit('newBlock', this.network);
+
+        if (this.blockWithConsensusInfoQueue.getLength() !== 0) {
+            this.collectorTimeoutObj = setTimeout(this.collector, 0);
+            return this.blockHeader;
+        } else {
+            this.collectorTimeoutObj = null;
+            return this.blockHeader;
+        }
     };
 }
 
 class WebSocketServerModel {
     private readonly wss: WebSocketServer = new WebSocketServer({ port: 3001 });
-
-    private block: Block[] = [];
-    private queue: Queue = new Queue();
+    private rooms: Record<Networks, Network> = {
+        Baobab: {
+            blockFinder: new BlockFinder({ url: baobabWSEN, network: Networks.baobab }, this.wss),
+            clients: new Map(),
+        },
+        Cypress: {
+            blockFinder: new BlockFinder({ url: cypressWSEN, network: Networks.cypress }, this.wss),
+            clients: new Map(),
+        },
+    };
 
     constructor() {
         this.initServerEventHandler();
     }
 
     private initServerEventHandler = () => {
-        this.wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
+        this.wss.on('connection', (ws: WebSocket_uuid) => {
+            ws['_uuid'] = uuidv4();
+
             this.initClientEventHandlers(ws).open();
             this.initClientEventHandlers(ws).close();
             this.initClientEventHandlers(ws).message();
             this.initClientEventHandlers(ws).error();
 
-            const _packet: PACKET_LAYAR = {
+            const _packet = {
                 type: 'connected',
-                data: 'connected',
+                data: ws._uuid,
             };
 
             ws.send(JSON.stringify(_packet));
         });
-    };
 
-    private pong = (ws: WebSocket, data: PACKET_LAYAR) => {
-        const _packet: PACKET_LAYAR = {
-            type: 'pong',
-            data: data.data,
-        };
-
-        ws.send(JSON.stringify(_packet));
-    };
-
-    public sendMessage = (ws: WebSocket, type: string, data: any) => {
-        if (ws.readyState !== ws.OPEN) {
-            console.log('** WebSocket is not Open **');
-            new Error('** WebSocket is Close **');
-            return;
-        }
-
-        const _packet: PACKET_LAYAR = {
-            type: type,
-            data: data,
-        };
-
-        ws.send(JSON.stringify(_packet));
-    };
-
-    public broadcast = (_type: string, _data: any) => {
-        const _packet: PACKET_LAYAR = {
-            type: _type,
-            data: _data,
-        };
-        this.wss?.clients.forEach(function each(client: { send: (arg0: string) => void }) {
-            client.send(JSON.stringify(_packet));
+        this.wss.on('newBlock', (network: Networks) => {
+            this.broadcastByNetwork('newBlock', network, this.rooms[network].blockFinder.blockHeader);
         });
     };
 
-    private initClientEventHandlers = (ws: WebSocket) => {
+    private sendMessage = (ws: WebSocket_uuid, type: string, data: any, network: Networks): void => {
+        if (ws.readyState !== ws.OPEN) throw new Error('** WebSocket is Close **');
+
+        const _packet: PACKET_LAYAR = { type, network, data };
+
+        ws.send(JSON.stringify(_packet));
+    };
+
+    private enterRooms = (ws: WebSocket_uuid, data: PACKET_LAYAR) => {
+        this.rooms[data.network].clients.set(ws._uuid, ws);
+        this.sendMessage(
+            ws,
+            'initBlocks',
+            {
+                blocks: this.rooms[data.network].blockFinder.collection.slice(-11),
+                txs: this.rooms[data.network].blockFinder.collection
+                    .map((item) => item.txs)
+                    .flat()
+                    .slice(-11),
+            },
+            data.network,
+        );
+    };
+
+    private leaveRooms = (ws: WebSocket_uuid, data: PACKET_LAYAR) => {
+        if (data.prevNetwork) this.rooms[data.prevNetwork].clients.delete(ws._uuid);
+        else {
+            for (const network of Object.values(this.rooms)) {
+                network.clients.delete(ws._uuid);
+            }
+        }
+    };
+
+    private setNetwork = (ws: WebSocket_uuid, data: PACKET_LAYAR) => {
+        this.leaveRooms(ws, data);
+        this.enterRooms(ws, data);
+    };
+
+    private broadcastByNetwork = (type: string, network: Networks, data: Block | undefined) => {
+        const _packet: PACKET_LAYAR = { type, network, data };
+
+        for (const client of Array.from(this.rooms[network].clients.values())) {
+            client.send(JSON.stringify(_packet));
+        }
+    };
+
+    private initClientEventHandlers = (ws: WebSocket_uuid) => {
         return {
             message: () =>
-                ws.on('message', async (data: any, isBinary: boolean) => {
+                ws.on('message', async (data: any) => {
                     const _data: PACKET_LAYAR = JSON.parse(data);
 
                     switch (_data.type) {
-                        case 'ping':
-                            this.pong(ws, _data);
+                        case 'enterRooms':
+                            this.enterRooms(ws, _data);
+                            break;
+                        case 'leaveRooms':
+                            this.leaveRooms(ws, _data);
+                            break;
+                        case 'setNetwork':
+                            this.setNetwork(ws, _data);
                             break;
 
                         default:
@@ -134,6 +259,10 @@ class WebSocketServerModel {
             close: () =>
                 ws.on('close', (code: number, reason: Buffer) => {
                     console.log(`Disconnect Client (${code}) ${reason.toString()}]`);
+
+                    for (const network of Object.values(this.rooms)) {
+                        network.clients.delete(ws._uuid);
+                    }
                 }),
 
             error: () =>

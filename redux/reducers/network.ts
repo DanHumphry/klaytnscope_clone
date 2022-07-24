@@ -1,24 +1,18 @@
+import { webSocketHost } from 'utils/variables';
 import WebSocketClientModel from 'utils/websocket.client';
 import * as types from 'redux/types';
 
 const initialTimerState = {
-    selectedNetwork: 'Baobab',
-    othersNetworks: ['Main'],
-    wss: null,
+    wss: typeof window !== 'undefined' ? new WebSocketClientModel(new window.WebSocket(webSocketHost)) : null,
+    blockHeader: {},
 };
 
 const networkReducer = (state = initialTimerState, { type, payload }: any) => {
     switch (type) {
-        case types.SET_NETWORK:
+        case types.SET_BLOCK_HEADER:
             return {
                 ...state,
-                selectedNetwork: payload.selectedNetwork,
-                othersNetworks: payload.othersNetworks,
-            };
-        case types.INIT_WEBSOCKET:
-            return {
-                ...state,
-                wss: new WebSocketClientModel(payload.wss),
+                blockHeader: payload.blockHeader,
             };
         default:
             return state;

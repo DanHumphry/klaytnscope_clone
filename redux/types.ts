@@ -1,5 +1,4 @@
 /** network types **/
 /*********************************************************/
-export const SET_NETWORK = 'SET_NETWORK';
-export const INIT_WEBSOCKET = 'INIT_WEBSOCKET';
+export const SET_BLOCK_HEADER = 'SET_BLOCK_HEADER';
 /*********************************************************/
