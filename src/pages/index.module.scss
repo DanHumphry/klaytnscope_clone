@@ -1,0 +1,373 @@
+.Home {
+    //display: table;
+    width: 100%;
+    height: calc(100vh - 55px);
+    max-width: 1480px;
+    margin: 0 auto;
+    padding: 70px 0;
+
+    .Home__mainPage {
+        //display: table-cell;
+        width: 100%;
+        max-width: 1480px;
+        vertical-align: middle;
+
+        .Home__mainPage__search {
+            margin-bottom: 1.5rem;
+
+            .SearchInput__container {
+                border-radius: 0;
+                display: block;
+                max-width: 100%;
+                margin: 0 auto;
+                height: 8rem;
+                line-height: 8rem;
+                position: relative;
+                width: 100%;
+
+                .SearchInput {
+                    margin: 0 auto;
+                    position: relative;
+                    height: 100%;
+
+                    input {
+                        background-color: hsla(0, 0%, 100%, 0.04);
+                        color: #fff;
+                        padding: 0 8rem 0 3rem;
+                        border-radius: 4px;
+                        font-size: 16px;
+                        font-weight: 400;
+                        font-style: normal;
+                        border: 1px solid transparent;
+                        outline: none;
+                        width: 100%;
+                        height: 100%;
+                    }
+                }
+
+                .SearchButton {
+                    cursor: pointer;
+                    width: 7.4rem;
+                    height: 6.8rem;
+                    font-size: 0;
+                    color: transparent;
+                    vertical-align: middle;
+                    background: 50% / contain no-repeat
+                        url('https://baobab.scope.klaytn.com/icons/icon-main-search-off.svg');
+                    background-size: 2rem;
+                    right: 6px;
+                    top: 6px;
+                    border-radius: 4px;
+                    background-color: #353b6b;
+                    transition: background-color 0.1s ease-in;
+                    position: absolute;
+                    padding: 1.8rem;
+                    border: 1px solid transparent;
+                }
+
+                .SearchButton:hover {
+                    background-color: #475dbe;
+                }
+            }
+        }
+
+        .Home__mainIndicators {
+            &:after {
+                content: '';
+                display: table;
+                clear: both;
+            }
+            position: relative;
+            width: 100%;
+            margin-bottom: 15px;
+
+            .BlockHeightIndicator,
+            .NetworkPerformanceIndicator,
+            .MainList__graph {
+                float: left;
+                height: 200px;
+                color: #fff;
+
+                .main__inner__box {
+                    padding: 20px 30px;
+                    height: 200px;
+                    border-radius: 4px;
+                    background-color: hsla(0, 0%, 100%, 0.03);
+
+                    .main__box__title {
+                        margin-bottom: 20px;
+                        font-size: 1.5rem;
+                        font-weight: 400;
+                    }
+                }
+            }
+
+            .BlockHeightIndicator {
+                color: #fff;
+                width: 25%;
+                padding-right: 10px;
+
+                .blockHeight_view {
+                    margin: 46px 0 27px;
+                    font-size: 3rem;
+                    font-weight: 400;
+
+                    img {
+                        width: 29px;
+                        height: 34px;
+                        vertical-align: text-top;
+                        margin-right: 15px;
+                    }
+
+                    .blockHeight_message {
+                        font-size: 1.1rem;
+                        font-weight: 400;
+                        opacity: 0.5;
+                        line-height: 1.45;
+                    }
+                }
+            }
+
+            .NetworkPerformanceIndicator {
+                width: 50%;
+                padding: 0 5px;
+            }
+
+            .MainList__graph {
+                width: 25%;
+                padding-left: 10px;
+            }
+        }
+
+        .Home__mainBottom__list {
+            .MainListBox {
+                width: 50%;
+                float: left;
+                padding-right: 8px;
+
+                .MainList {
+                    overflow: hidden;
+                    position: relative;
+                    padding: 22px 30px 25px;
+                    border-radius: 4px;
+                    background-color: hsla(0, 0%, 100%, 0.03);
+                    width: 100%;
+                    max-width: 1480px;
+                    margin: 0 auto;
+
+                    .ListTemplate__header {
+                        margin-bottom: 1.5rem;
+                        &:after {
+                            content: '';
+                            display: block;
+                            clear: both;
+                        }
+
+                        .ListTemplate__title {
+                            color: #fff;
+                            font-size: 15px;
+                            font-weight: 400;
+                            display: flex;
+                            float: left;
+                            margin-top: 10px;
+                        }
+                    }
+
+                    .ListTemplate__content__isMain {
+                        background-color: transparent;
+                        padding: 0 0 23px;
+                        border-radius: 5px;
+                        box-shadow: 0 4px 6px 0 rgb(0 0 0 / 4%);
+                        height: 51.9rem;
+
+                        .MainList__table {
+                            .Table {
+                                width: 100%;
+                                text-align: left;
+                                color: #9699b2;
+                                margin-bottom: 2.5rem;
+                                border-collapse: collapse;
+
+                                .Table__thead {
+                                    display: flex;
+                                    justify-content: space-between;
+                                    height: 45px;
+                                    border-bottom: 1px solid #e1e1e7;
+                                    vertical-align: middle;
+                                    border-color: hsla(0, 0%, 100%, 0.08);
+
+                                    .Table__th__right {
+                                        text-align: right;
+                                    }
+
+                                    .Table__th {
+                                        font-weight: 700;
+                                        color: rgba(132, 171, 255, 0.7);
+                                        display: inline-block;
+                                        height: 100%;
+                                        line-height: 45px;
+                                        text-transform: uppercase;
+                                        letter-spacing: 0.4px;
+                                        vertical-align: middle;
+                                        font-size: 12px;
+
+                                        .BlockList__unitHeader {
+                                            display: inline-block;
+                                            vertical-align: middle;
+                                            margin-top: -1px;
+                                            line-height: 1.2;
+                                            text-align: center;
+                                            span {
+                                                display: inline-block;
+                                                margin-left: 0;
+                                            }
+                                        }
+
+                                        .TxList__fromToTh {
+                                            .FromTo__header {
+                                                width: 11rem;
+                                                text-align: center;
+                                                display: inline-block;
+                                            }
+                                        }
+                                    }
+                                }
+
+                                .Table__tbody {
+                                    .Table__tr {
+                                        display: flex;
+                                        justify-content: space-between;
+                                        height: 42px;
+                                        margin-top: -1px;
+                                        border-bottom: 1px solid #f8f8f8;
+                                        border-color: hsla(0, 0%, 100%, 0.08);
+
+                                        .Table__td {
+                                            height: 100%;
+                                            line-height: 42px;
+                                            display: inline-block;
+                                            vertical-align: top;
+                                            font-size: 1.3rem;
+                                            color: #888;
+                                            font-weight: 400;
+
+                                            .CroppedTxWithLink {
+                                                position: relative;
+                                                display: inline-block;
+
+                                                a {
+                                                    text-decoration: none;
+                                                    transition: all 0.1s ease-in-out;
+                                                    position: relative;
+                                                    display: inline-block;
+                                                    height: 24px;
+                                                    line-height: 24px;
+                                                    border-radius: 2px;
+                                                    vertical-align: middle;
+                                                    text-align: center;
+                                                    overflow: hidden;
+                                                    text-overflow: ellipsis;
+                                                    padding: 0 3px 0 8px;
+                                                    font-size: 1.3rem;
+                                                    font-weight: 400;
+                                                    width: 130px;
+                                                    color: #fff;
+                                                    background-color: hsla(0, 0%, 100%, 0.1);
+                                                }
+                                            }
+
+                                            .CroppedTxWithLink__address {
+                                                width: 100%;
+                                                a {
+                                                    width: 100%;
+                                                }
+                                            }
+
+                                            .TimeDelta {
+                                                vertical-align: top;
+                                            }
+
+                                            .numberData {
+                                                color: #fff;
+                                                font-weight: bold;
+                                            }
+                                        }
+
+                                        .Table__td__right {
+                                            text-align: right;
+                                        }
+                                    }
+                                }
+
+                                .MainList__table__number,
+                                .MainList__table__totalTx {
+                                    width: 15%;
+                                }
+
+                                .MainList__table__timestamp,
+                                .MainList__table__reward {
+                                    width: 20%;
+                                }
+
+                                .MainList__table__proposer {
+                                    text-align: center;
+                                    width: 30%;
+                                }
+
+                                .MainList__table__txHash {
+                                    width: 27%;
+                                }
+
+                                .MainList__table__timestamp_th {
+                                    width: 18%;
+                                }
+
+                                .MainList__table__fromTo {
+                                    text-align: center;
+                                    width: 55%;
+                                }
+
+                                .FromTo__arrow {
+                                    opacity: 0.7;
+                                    display: inline-block;
+                                    width: 2.6rem;
+                                    height: 0.8rem;
+                                    vertical-align: middle;
+                                    background: 50% / contain no-repeat
+                                        url('https://baobab.scope.klaytn.com/icons/icon-arrow-scope.svg');
+                                }
+                                .FromTo__arrow.white__arrow {
+                                    background: 50% / contain no-repeat
+                                        url('https://baobab.scope.klaytn.com/icons/icon-arrow-white.svg');
+                                }
+                            }
+                        }
+                    }
+
+                    .ListTemplate__bottom {
+                        text-align: center;
+
+                        .ListTemplate__moreButton {
+                            display: inline-block;
+                            width: 210px;
+                            height: 46px;
+                            line-height: 46px;
+                            text-align: center;
+                            padding: 0;
+                            font-size: 12px;
+                            transition: background-color 0.1s;
+                            color: #fff;
+                            background-color: hsla(0, 0%, 100%, 0.06);
+                            border: none;
+                            border-radius: 23px;
+                        }
+                    }
+                }
+            }
+
+            .MainListBox + .MainListBox {
+                padding: 0 0 0 8px;
+            }
+        }
+    }
+}

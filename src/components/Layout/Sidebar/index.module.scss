@@ -1,0 +1,82 @@
+.Layout_sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 24rem;
+    height: 100vh;
+    background-color: #313557;
+    overflow-y: auto;
+    z-index: 100;
+
+    .Sidebar__inner {
+        position: relative;
+        height: 100%;
+        min-height: 100rem;
+        padding: 2.4rem 0 4rem;
+
+        .Sidebar__logo {
+            width: 157px;
+            height: 24px;
+            margin: 0 auto 7rem;
+        }
+
+        .SidebarNav {
+            height: calc(100% - 30rem);
+
+            ul li:nth-child(1) {
+                background-image: url('https://baobab.scope.klaytn.com/icons/icon-menu-blocks-on.svg');
+            }
+
+            ul li:nth-child(2) {
+                background-image: url('https://baobab.scope.klaytn.com/icons/icon-menu-transactions-on.svg');
+            }
+
+            ul .SidebarLink {
+                background: 4.6rem 2.5rem/3rem 3rem no-repeat;
+                transition: background-color 0.1s ease-in, background-image 0.1s ease-in, color 0.1s ease-in;
+                color: #73768d;
+                font-size: 1.6rem;
+                position: relative;
+
+                &:hover {
+                    color: #fff;
+                    background-color: rgba(0, 0, 0, 0.22);
+                }
+                &:before {
+                    content: '';
+                    position: absolute;
+                    width: 4px;
+                    height: 4px;
+                    border-radius: 50%;
+                    left: 26px;
+                    top: 40px;
+                    background-color: hsla(0, 0%, 100%, 0.2);
+                    transition: background-color 0.1s ease-in;
+                }
+
+                .SidebarLink__anchor {
+                    padding: 3rem 0;
+                    display: block;
+                    width: 100%;
+                    height: 100%;
+
+                    .SidebarLink__linkName {
+                        padding-left: 9.5rem;
+                        letter-spacing: 0.3px;
+                        font-size: 1.6rem;
+                        font-weight: 400;
+                    }
+                }
+            }
+
+            ul .SidebarLink__active {
+                color: #fff;
+                background-color: rgba(0, 0, 0, 0.22);
+
+                &:before {
+                    background-color: #fff;
+                }
+            }
+        }
+    }
+}

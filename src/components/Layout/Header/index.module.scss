@@ -1,0 +1,107 @@
+.Layout_header {
+    width: 100%;
+    max-width: 1480px;
+    margin: 0 auto;
+    height: 40px;
+
+    .Header__dropdownMenu {
+        display: inline-block;
+        position: relative;
+        float: right;
+        border: 1px solid hsla(0, 0%, 100%, 0.1);
+        border-radius: 10rem;
+        background: left 2.2rem center/0.9rem no-repeat
+            url('https://baobab.scope.klaytn.com/icons/icon-network-white.svg');
+        transition: border-color 0.1s ease-in;
+
+        &:hover {
+            border: 1px solid hsla(0, 0%, 100%, 1);
+            .Header__dropdownMenu_arrow {
+                border-color: #fff transparent transparent;
+            }
+        }
+
+        .Header__dropdownMenu__control {
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            text-align: left;
+            font-size: 1.2rem;
+            font-weight: 700;
+            line-height: 1.5rem;
+            width: 18.8rem;
+            //height: 3.8rem;
+            padding: 1.2rem 0 1.2rem 4.1rem;
+            color: #fff;
+            //cursor: default;
+            outline: none;
+            transition: all 0.2s ease;
+
+            .Header__dropdownMenu_arrow {
+                border-color: #999 transparent transparent;
+                border-style: solid;
+                border-width: 5px 5px 0;
+                content: ' ';
+                display: block;
+                height: 0;
+                position: absolute;
+                right: 16px;
+                top: 16px;
+                width: 0;
+            }
+        }
+
+        .Header__dropdownMenu__menu {
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: 400;
+            box-sizing: border-box;
+            margin-top: -41px;
+            width: 190px;
+            margin-left: -1px;
+            max-height: 200px;
+            overflow-y: auto;
+            position: absolute;
+            top: 100%;
+            z-index: 1000;
+            -webkit-overflow-scrolling: touch;
+            background-color: #313557;
+            color: #fff;
+            box-shadow: 0 4px 10px 0 rgb(0 0 0 / 35%);
+
+            .Header__dropdownMenu__option {
+                box-sizing: border-box;
+                position: relative;
+                height: 47px;
+                line-height: 47px;
+                cursor: pointer;
+                display: block;
+                padding: 0 0 0 41px;
+                transition: background-color 0.1s ease-in, color 0.1s ease-in;
+            }
+
+            .is__selected {
+                color: #6ad1ba;
+                font-size: 12px;
+                font-weight: 400;
+
+                &:before {
+                    content: '';
+                    position: absolute;
+                    top: 50%;
+                    left: 24px;
+                    display: inline-block;
+                    width: 6px;
+                    height: 6px;
+                    margin-top: -4px;
+                    border-radius: 50%;
+                    background-color: #6ad1ba;
+                }
+            }
+        }
+    }
+
+    .Header__dropdownMenu__isOpened {
+        border-color: #fff;
+    }
+}
