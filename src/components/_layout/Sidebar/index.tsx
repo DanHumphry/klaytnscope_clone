@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import cx from 'classnames';
 import Link from 'next/link';
 
-import css from 'components/Layout/Sidebar/index.module.scss';
+import css from 'components/_layout/Sidebar/index.module.scss';
 
 const menu = [
     {

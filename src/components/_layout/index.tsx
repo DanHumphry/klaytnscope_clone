@@ -1,8 +1,8 @@
-import Header from 'components/Layout/Header';
-import SideBar from 'components/Layout/Sidebar';
+import Header from 'components/_layout/Header';
+import SideBar from 'components/_layout/Sidebar';
 import React, { useState } from 'react';
 
-import css from 'components/Layout/index.module.scss';
+import css from 'components/_layout/index.module.scss';
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
     const [selectedPath, setSelectedPath] = useState('/Home');

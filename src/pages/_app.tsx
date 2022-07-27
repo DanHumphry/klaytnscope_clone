@@ -1,4 +1,4 @@
-import Layout from 'components/Layout';
+import Layout from 'components/_layout';
 import type { AppProps } from 'next/app';
 import { useRouter } from 'next/router';
 import { useEffect, useMemo } from 'react';

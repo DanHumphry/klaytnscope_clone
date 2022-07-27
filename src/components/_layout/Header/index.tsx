@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from 'redux/reducers';
-import css from 'components/Layout/Header/index.module.scss';
+import css from 'components/_layout/Header/index.module.scss';
 
 const Header = () => {
     const { wss } = useSelector((state: RootState) => state.networkReducer);
