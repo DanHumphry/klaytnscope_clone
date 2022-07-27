@@ -8,7 +8,7 @@ import { Queue } from '../utils/commonJS';
 import { committee } from '../utils/variables';
 import { Block, Networks, PACKET_LAYAR, WebSocket_uuid } from './index.declare';
 
-const cypressWSEN = 'ws://en.ws.ciccommunity.com:8552';
+const cypressWSEN = 'wss://public-node-api.klaytnapi.com/v1/cypress/ws';
 const baobabWSEN = 'wss://api.baobab.klaytn.net:8652';
 
 class WebSocketServerModel {
