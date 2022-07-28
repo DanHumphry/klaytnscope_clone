@@ -6,14 +6,8 @@ import Link from 'next/link';
 import css from 'components/_layout/Sidebar/index.module.scss';
 
 const menu = [
-    {
-        name: 'Blocks',
-        href: '/blocks',
-    },
-    {
-        name: 'Transactions',
-        href: '/txs',
-    },
+    { name: 'Blocks', href: '/blocks' },
+    { name: 'Transactions', href: '/txs' },
 ];
 
 type SideBarProps = {

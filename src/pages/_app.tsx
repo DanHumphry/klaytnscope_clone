@@ -9,33 +9,30 @@ import 'styles/globals.css';
 
 function MyApp({ Component, pageProps }: AppProps) {
     const store = useStore(pageProps.initialReduxState);
-    const router = useRouter();
+    const path = useRouter().pathname;
 
-    const wss = store.getState().networkReducer.wss;
     const history: string[] = useMemo(() => [], []);
 
     useEffect(() => {
+        const wss = store.getState().networkReducer.wss;
+
         if (history.length !== 0) {
             const prevPath = history[history.length - 1];
-            const currentPath = router.pathname;
+            const currentPath = path;
 
-            if (prevPath === '/' && currentPath !== '/') {
-                wss?.sendMessage('leaveRooms');
-                console.log('require leave rooms');
-            } else if (currentPath === '/') {
-                wss?.sendMessage('enterRooms');
-                console.log('require enter rooms');
-            }
+            if (prevPath === '/' && currentPath !== '/') wss?.sendMessage('leaveRooms');
+            else if (currentPath === '/') wss?.sendMessage('enterRooms');
         }
 
-        history.push(router.pathname);
-    }, [router.pathname]);
+        history.push(path);
+    }, [path]);
 
     return (
         <Provider store={store}>
             <Layout>
                 <Component {...pageProps} />
             </Layout>
+            <div id="BackgroundClickEvent" onClick={() => document.dispatchEvent(new Event('BackgroundClickEvent'))} />
         </Provider>
     );
 }

@@ -3,10 +3,58 @@
     max-width: 1480px;
     margin: 0 auto;
     height: 40px;
+    display: flex;
+    justify-content: space-between;
+
+    .Header__search__input {
+        float: left;
+        width: 100%;
+        max-width: 54rem;
+        position: relative;
+        display: inline-block;
+
+        .Header__search__input__container {
+            margin: 0 auto;
+            position: relative;
+            height: 100%;
+
+            .search__input {
+                background-color: rgba(23, 35, 131, 0.07);
+                border-radius: 10rem;
+                padding: 0 8rem 0 2.2rem;
+                height: 3.8rem;
+                line-height: 3.8rem;
+                border: 1px solid transparent;
+                outline: none;
+                width: 100%;
+            }
+        }
+
+        .search__button {
+            //background-color: #4e527d;
+            //background-image: url('https://baobab.scope.klaytn.com/icons/icon-top-search-wh.svg');
+            position: absolute;
+            right: 0;
+            top: 0;
+            border-top-right-radius: 10rem;
+            border-bottom-right-radius: 10rem;
+            padding: 1.8rem;
+            border: 1px solid transparent;
+            width: 4.5rem;
+            height: 3.8rem;
+            font-size: 0;
+            color: transparent;
+            vertical-align: middle;
+            background: 50% / contain no-repeat url('https://baobab.scope.klaytn.com/icons/icon-search-01.svg');
+            background-size: 1.6rem;
+            transition: background-color 0.1s ease-in-out, background-image 0.1s ease-in-out;
+        }
+    }
 
     .Header__dropdownMenu {
         display: inline-block;
         position: relative;
+        color: #fff;
         float: right;
         border: 1px solid hsla(0, 0%, 100%, 0.1);
         border-radius: 10rem;
@@ -32,7 +80,6 @@
             width: 18.8rem;
             //height: 3.8rem;
             padding: 1.2rem 0 1.2rem 4.1rem;
-            color: #fff;
             //cursor: default;
             outline: none;
             transition: all 0.2s ease;
@@ -66,7 +113,6 @@
             z-index: 1000;
             -webkit-overflow-scrolling: touch;
             background-color: #313557;
-            color: #fff;
             box-shadow: 0 4px 10px 0 rgb(0 0 0 / 35%);
 
             .Header__dropdownMenu__option {
@@ -78,6 +124,10 @@
                 display: block;
                 padding: 0 0 0 41px;
                 transition: background-color 0.1s ease-in, color 0.1s ease-in;
+
+                &:hover {
+                    background-color: rgba(0, 0, 0, 0.22);
+                }
             }
 
             .is__selected {
@@ -101,7 +151,23 @@
         }
     }
 
-    .Header__dropdownMenu__isOpened {
-        border-color: #fff;
+    .Header__not__home {
+        color: #313557;
+        border: 1px solid rgba(49, 53, 87, 0.1);
+        background: left 2.2rem center/0.9rem no-repeat url('https://baobab.scope.klaytn.com/icons/icon-network.svg');
+
+        &:hover {
+            border: 1px solid #313557;
+        }
+
+        .Header__dropdownMenu__control {
+            .Header__dropdownMenu_arrow {
+                border-color: #313557 transparent transparent;
+            }
+        }
+
+        .Header__dropdownMenu__menu {
+            color: #fff;
+        }
     }
 }

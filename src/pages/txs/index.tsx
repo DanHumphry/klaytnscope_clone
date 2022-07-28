@@ -1,7 +1,7 @@
 import { NextPage } from 'next';
 
 const Txs: NextPage = () => {
-    return <div>Txs</div>;
+    return <div></div>;
 };
 
 export default Txs;

@@ -1,6 +1,6 @@
 import { Block, Networks, Txs, PACKET_LAYAR } from 'socket/index.declare';
 
-declare interface Network {
+interface Network {
     selected: Networks;
     others: Networks[];
 }

@@ -1,4 +1,4 @@
-.Layout_main {
+.Layout_main_home {
     position: relative;
     top: 0;
     left: 24rem;
@@ -12,4 +12,17 @@
     background-image: url('https://baobab.scope.klaytn.com/images/main-bg.png');
     background-repeat: no-repeat;
     background-size: cover;
+}
+
+.Layout_main_other {
+    position: relative;
+    top: 0;
+    left: 24rem;
+    width: calc(100% - 24rem);
+    height: 100%;
+    min-height: 100vh;
+    -webkit-overflow-scrolling: touch;
+    padding: 1.5rem 5.4rem 3rem;
+    background-color: #f8f9fa;
+    background-image: linear-gradient(180deg, #f8f9fa, #eaeef7);
 }
