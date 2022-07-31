@@ -1,8 +1,8 @@
 import { WebSocket } from 'ws';
 
 export enum Networks {
-    baobab = 'Baobab',
-    cypress = 'Cypress',
+    Baobab = 'Baobab',
+    Cypress = 'Cypress',
 }
 
 export interface Block {
@@ -16,7 +16,7 @@ export interface Block {
     txs: Txs[];
 }
 
-export declare interface Txs {
+export interface Txs {
     txHash: string;
     timestamp: number;
     from: string;

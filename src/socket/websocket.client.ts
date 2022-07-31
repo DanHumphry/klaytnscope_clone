@@ -9,7 +9,7 @@ class WebSocketClientModel {
     private ws: WebSocket;
     private _uuid: string | undefined;
 
-    private network: Network = { selected: Networks.baobab, others: [Networks.cypress] };
+    private network: Network = { selected: Networks.Baobab, others: [Networks.Cypress] };
 
     public blocks: Block[] = [];
     public txs: Txs[] = [];

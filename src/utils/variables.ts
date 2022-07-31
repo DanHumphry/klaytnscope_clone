@@ -1,5 +1,6 @@
 export const clientHost = 'http://localhost:3000';
 export const webSocketHost = 'ws://localhost:3001';
+export const serverHost = 'http://localhost:3001';
 
 export const committee = [
     [

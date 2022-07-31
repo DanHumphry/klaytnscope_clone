@@ -1,10 +1,10 @@
-import Layout from 'components/_layout';
 import type { AppProps } from 'next/app';
 import { useRouter } from 'next/router';
 import { useEffect, useMemo } from 'react';
 import { Provider } from 'react-redux';
-import { useStore } from 'redux/store';
 
+import Layout from 'components/_layout';
+import { useStore } from 'redux/store';
 import 'styles/globals.css';
 
 function MyApp({ Component, pageProps }: AppProps) {

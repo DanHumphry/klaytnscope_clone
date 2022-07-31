@@ -1,30 +1,35 @@
+import { Server } from 'http';
 import { BlockHeader } from 'web3-eth';
 import { WebSocketServer } from 'ws';
-import Caver from 'caver-js';
+import Caver, { TransactionForRPC, TransactionReceipt } from 'caver-js';
 import Web3 from 'web3';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Queue } from '../utils/commonJS';
-import { committee } from '../utils/variables';
-import { Block, Networks, PACKET_LAYAR, WebSocket_uuid } from './index.declare';
+import { Queue } from '../../utils/commonJS';
+import { committee } from '../../utils/variables';
+import { Block, Networks, PACKET_LAYAR, WebSocket_uuid } from '../../socket/index.declare';
 
 const cypressWSEN = 'wss://public-node-api.klaytnapi.com/v1/cypress/ws';
 const baobabWSEN = 'wss://api.baobab.klaytn.net:8652';
 
 class WebSocketServerModel {
-    private readonly wss: WebSocketServer = new WebSocketServer({ port: 3001 });
-    private rooms: Record<Networks, Network> = {
-        Baobab: {
-            blockFinder: new BlockFinder({ url: baobabWSEN, network: Networks.baobab }, this.wss),
-            clients: new Map(),
-        },
-        Cypress: {
-            blockFinder: new BlockFinder({ url: cypressWSEN, network: Networks.cypress }, this.wss),
-            clients: new Map(),
-        },
-    };
+    private readonly wss: WebSocketServer;
 
-    constructor() {
+    public rooms: Record<Networks, Network>;
+
+    constructor(option: { server: Server }) {
+        this.wss = new WebSocketServer({ server: option.server });
+        this.rooms = {
+            Baobab: {
+                blockFinder: new BlockFinder({ url: baobabWSEN, network: Networks.Baobab }, this.wss),
+                clients: new Map(),
+            },
+            Cypress: {
+                blockFinder: new BlockFinder({ url: cypressWSEN, network: Networks.Cypress }, this.wss),
+                clients: new Map(),
+            },
+        };
+
         this.initServerEventHandler();
     }
 
@@ -64,8 +69,8 @@ class WebSocketServerModel {
             ws,
             'initBlocks',
             {
-                blocks: this.rooms[data.network].blockFinder.collection.slice(-11),
-                txs: this.rooms[data.network].blockFinder.collection
+                blocks: this.rooms[data.network].blockFinder.blockArray.slice(-11),
+                txs: this.rooms[data.network].blockFinder.blockArray
                     .map((item) => item.txs)
                     .flat()
                     .slice(-11),
@@ -144,9 +149,11 @@ class BlockFinder {
     private network: Networks;
     private wss: WebSocketServer;
 
-    public collection: Block[] = [];
+    public blockArray: Block[] = [];
+    public txsArray: TransactionForRPC[] | any = [];
     public blockHeader: Block | undefined = undefined;
     protected collectorTimeoutObj: NodeJS.Timeout | null = null;
+    private collectorInterval: number = 0;
     protected blockWithConsensusInfoQueue: Queue = new Queue();
 
     protected caver: Caver;
@@ -170,60 +177,69 @@ class BlockFinder {
         web3.eth.subscribe('newBlockHeaders').on('data', this.blockListener).on('error', console.error);
     };
 
-    private blockListener = async (block: BlockHeader) => {
-        const receipts = await this.caver.klay.getBlockWithConsensusInfo(block.number);
-        this.blockWithConsensusInfoQueue.enqueue(receipts);
+    private blockListener = (block: BlockHeader): void => {
+        this.blockWithConsensusInfoQueue.enqueue(block.number);
 
-        if (!this.collectorTimeoutObj) {
-            this.collectorTimeoutObj = setTimeout(this.collector, 0);
-        }
+        if (!this.collectorTimeoutObj) this.collectorTimeoutObj = setTimeout(this.collector, this.collectorInterval);
     };
 
-    private collector = (): void => {
+    private collector = async (): Promise<void> => {
         if (this.blockWithConsensusInfoQueue.getLength() === 0) {
             this.collectorTimeoutObj = null;
             return;
         }
 
-        const receipts = this.blockWithConsensusInfoQueue.dequeue();
-        const { number, timestamp, transactions, originProposer, gasUsed } = receipts;
+        const blockNumber = this.blockWithConsensusInfoQueue.dequeue();
 
-        const txs = [];
+        try {
+            const receipts = await this.caver.klay.getBlockWithConsensusInfo(blockNumber);
+            const { number, timestamp, transactions, originProposer, gasUsed } = receipts as any;
 
-        for (const tx of transactions) {
-            const { transactionHash, status, from, type, to } = tx;
-            txs.push({
-                txHash: transactionHash,
+            const txs = [];
+
+            for (const tx of transactions) {
+                const { transactionHash, status, from, type, to } = tx;
+                const val = {
+                    txHash: transactionHash,
+                    timestamp: +timestamp,
+                    from: from,
+                    to: to || '',
+                    status: +status,
+                    txCategory: type,
+                    fromName: '',
+                    toName: '',
+                };
+
+                txs.push(val);
+                this.txsArray.push(val);
+            }
+
+            const proposerIdx = committee[0].indexOf(originProposer);
+
+            const block = {
+                number: +number,
                 timestamp: +timestamp,
-                from: from,
-                to: to || '',
-                status: +status,
-                txCategory: type,
-                fromName: '',
-                toName: '',
-            });
+                totalTx: transactions.length,
+                proposer: originProposer,
+                reward: 9.6 * 10 ** 18 + 250000000000 * gasUsed + '',
+                gasUsed: gasUsed,
+                proposerName: proposerIdx === -1 ? '' : committee[1][proposerIdx],
+                txs: txs,
+            };
+
+            this.blockHeader = block;
+            this.blockArray.push(block);
+            this.wss.emit('newBlock', this.network);
+        } catch (e: any) {
+            if (e.message.indexOf('the block does not exist')) {
+                this.collectorInterval += 100;
+                this.blockWithConsensusInfoQueue.unShift(blockNumber);
+            } else console.error(e);
+        } finally {
+            if (this.blockWithConsensusInfoQueue.getLength() !== 0) {
+                this.collectorTimeoutObj = setTimeout(this.collector, this.collectorInterval);
+            } else this.collectorTimeoutObj = null;
         }
-
-        const proposerIdx = committee[0].indexOf(originProposer);
-
-        const block = {
-            number: +number,
-            timestamp: +timestamp,
-            totalTx: transactions.length,
-            proposer: originProposer,
-            reward: 9.6 * 10 ** 18 + 250000000000 * gasUsed + '',
-            gasUsed: gasUsed,
-            proposerName: proposerIdx === -1 ? '' : committee[1][proposerIdx],
-            txs: txs,
-        };
-
-        this.blockHeader = block;
-        this.collection.push(block);
-        this.wss.emit('newBlock', this.network);
-
-        if (this.blockWithConsensusInfoQueue.getLength() !== 0) {
-            this.collectorTimeoutObj = setTimeout(this.collector, 0);
-        } else this.collectorTimeoutObj = null;
     };
 }
 
@@ -232,4 +248,4 @@ export interface Network {
     clients: Map<string, WebSocket_uuid>;
 }
 
-export default new WebSocketServerModel();
+export default WebSocketServerModel;

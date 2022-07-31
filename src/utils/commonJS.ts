@@ -14,6 +14,10 @@ export class Queue {
         return this.items.shift();
     }
 
+    public unShift(item: any): void {
+        this.items.unshift(item);
+    }
+
     public getItems(): any[] {
         return this.items;
     }
