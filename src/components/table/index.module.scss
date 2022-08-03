@@ -1,0 +1,217 @@
+.ListTemplate__common {
+    width: 100%;
+    max-width: 1480px;
+    margin: 0 auto;
+
+    .ListTemplate__header {
+        margin-bottom: 1.5rem;
+        &:after {
+            content: '';
+            display: block;
+            clear: both;
+        }
+
+        .ListTemplate__title {
+            display: flex;
+            float: left;
+            margin-top: 10px;
+            //font-size: 28px;
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: #000;
+        }
+    }
+
+    .MainList {
+        padding: 0 4rem 2.5rem;
+        border-radius: 5px;
+        background-color: #fff;
+        box-shadow: 0 4px 6px 0 rgb(0 0 0 / 4%);
+
+        .ListTemplate__content__isMain {
+            background-color: transparent;
+            padding: 0 0 23px;
+            border-radius: 5px;
+
+            .MainList__table {
+                .Table {
+                    width: 100%;
+                    text-align: left;
+                    margin-bottom: 2.5rem;
+                    border-collapse: collapse;
+
+                    .Table__thead {
+                        display: flex;
+                        justify-content: space-between;
+                        height: 45px;
+                        border-bottom: 1px solid #e1e1e7;
+                        vertical-align: middle;
+
+                        .Table__th__right {
+                            text-align: right;
+                        }
+
+                        .Table__th {
+                            font-weight: 700;
+                            color: #313557;
+                            display: inline-block;
+                            height: 100%;
+                            line-height: 45px;
+                            text-transform: uppercase;
+                            letter-spacing: 0.4px;
+                            vertical-align: middle;
+                            font-size: 12px;
+
+                            .BlockList__unitHeader {
+                                display: inline-block;
+                                vertical-align: middle;
+                                margin-top: -1px;
+                                line-height: 1.2;
+                                text-align: center;
+                                span {
+                                    display: inline-block;
+                                    margin-left: 0;
+                                }
+                            }
+
+                            .TxList__fromToTh {
+                                .FromTo__header {
+                                    width: 11rem;
+                                    text-align: center;
+                                    display: inline-block;
+                                }
+                            }
+                        }
+                    }
+
+                    .Table__tbody {
+                        .Table__tr {
+                            display: flex;
+                            justify-content: space-between;
+                            height: 42px;
+                            margin-top: -1px;
+                            border-bottom: 1px solid #f8f8f8;
+                            border-color: hsla(0, 0%, 100%, 0.08);
+
+                            .Table__td {
+                                height: 100%;
+                                line-height: 42px;
+                                display: inline-block;
+                                vertical-align: top;
+                                font-size: 1.3rem;
+                                color: #222;
+                                font-weight: 400;
+
+                                .CroppedTxWithLink {
+                                    position: relative;
+                                    display: inline-block;
+
+                                    a {
+                                        text-decoration: none;
+                                        transition: all 0.1s ease-in-out;
+                                        position: relative;
+                                        display: inline-block;
+                                        height: 24px;
+                                        line-height: 24px;
+                                        border-radius: 2px;
+                                        vertical-align: middle;
+                                        text-align: center;
+                                        overflow: hidden;
+                                        text-overflow: ellipsis;
+                                        padding: 0 3px 0 8px;
+                                        font-size: 1.3rem;
+                                        font-weight: 400;
+                                        width: 130px;
+                                        color: #222;
+                                        background-color: hsla(0, 0%, 100%, 0.1);
+                                    }
+                                }
+
+                                .CroppedTxWithLink__address {
+                                    width: 100%;
+                                    a {
+                                        width: 100%;
+                                    }
+                                }
+
+                                .TimeDelta {
+                                    vertical-align: top;
+                                }
+
+                                .numberData {
+                                    color: #222;
+                                    font-weight: bold;
+                                }
+                            }
+
+                            .Table__td__right {
+                                text-align: right;
+                            }
+                        }
+                    }
+
+                    //.MainList__table__number,
+                    //.MainList__table__totalTx {
+                    //    width: 15%;
+                    //}
+                    //
+                    //.MainList__table__timestamp,
+                    //.MainList__table__reward {
+                    //    width: 20%;
+                    //}
+                    //
+                    //.MainList__table__proposer {
+                    //    text-align: center;
+                    //    width: 30%;
+                    //}
+                    //
+                    //.MainList__table__txHash {
+                    //    width: 27%;
+                    //}
+                    //
+                    //.MainList__table__timestamp_th {
+                    //    width: 18%;
+                    //}
+                    //
+                    //.MainList__table__fromTo {
+                    //    text-align: center;
+                    //    width: 55%;
+                    //}
+
+                    .FromTo__arrow {
+                        opacity: 0.7;
+                        display: inline-block;
+                        width: 2.6rem;
+                        height: 0.8rem;
+                        vertical-align: middle;
+                        background: 50% / contain no-repeat
+                            url('https://baobab.scope.klaytn.com/icons/icon-arrow-scope.svg');
+                    }
+                    .FromTo__arrow.white__arrow {
+                        background: 50% / contain no-repeat
+                            url('https://baobab.scope.klaytn.com/icons/icon-arrow-white.svg');
+                    }
+                }
+            }
+        }
+
+        .ListTemplate__bottom {
+            text-align: center;
+
+            .ListTemplate__moreButton {
+                display: inline-block;
+                width: 210px;
+                height: 46px;
+                line-height: 46px;
+                text-align: center;
+                padding: 0;
+                font-size: 12px;
+                transition: background-color 0.1s;
+                color: #fff;
+                background-color: hsla(0, 0%, 100%, 0.06);
+                border: none;
+                border-radius: 23px;
+            }
+        }
+    }
+}

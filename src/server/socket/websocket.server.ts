@@ -1,13 +1,13 @@
 import { Server } from 'http';
 import { BlockHeader } from 'web3-eth';
 import { WebSocketServer } from 'ws';
-import Caver, { TransactionForRPC, TransactionReceipt } from 'caver-js';
+import Caver, { TransactionForRPC } from 'caver-js';
 import Web3 from 'web3';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Queue } from '../../utils/commonJS';
 import { committee } from '../../utils/variables';
-import { Block, Networks, PACKET_LAYAR, WebSocket_uuid } from '../../socket/index.declare';
+import { Block, Networks, PACKET_LAYAR, WebSocket_uuid, TableTitle } from '../../socket/index.declare';
 
 const cypressWSEN = 'wss://public-node-api.klaytnapi.com/v1/cypress/ws';
 const baobabWSEN = 'wss://api.baobab.klaytn.net:8652';
@@ -93,7 +93,7 @@ class WebSocketServerModel {
         this.enterRooms(ws, data);
     };
 
-    private broadcastByNetwork = (type: string, network: Networks, data: Block | undefined) => {
+    private broadcastByNetwork = (type: string, network: Networks, data: Block<TableTitle> | undefined) => {
         const _packet: PACKET_LAYAR = { type, network, data };
 
         for (const client of Array.from(this.rooms[network].clients.values())) {
@@ -149,9 +149,9 @@ class BlockFinder {
     private network: Networks;
     private wss: WebSocketServer;
 
-    public blockArray: Block[] = [];
+    public blockArray: Block<TableTitle>[] = [];
     public txsArray: TransactionForRPC[] | any = [];
-    public blockHeader: Block | undefined = undefined;
+    public blockHeader: Block<TableTitle> | undefined = undefined;
     protected collectorTimeoutObj: NodeJS.Timeout | null = null;
     private collectorInterval: number = 0;
     protected blockWithConsensusInfoQueue: Queue = new Queue();
@@ -193,12 +193,12 @@ class BlockFinder {
 
         try {
             const receipts = await this.caver.klay.getBlockWithConsensusInfo(blockNumber);
-            const { number, timestamp, transactions, originProposer, gasUsed } = receipts as any;
+            const { number, timestamp, transactions, originProposer, gasUsed, size } = receipts as any;
 
             const txs = [];
 
             for (const tx of transactions) {
-                const { transactionHash, status, from, type, to } = tx;
+                const { transactionHash, status, from, type, to, value } = tx;
                 const val = {
                     txHash: transactionHash,
                     timestamp: +timestamp,
@@ -208,6 +208,7 @@ class BlockFinder {
                     txCategory: type,
                     fromName: '',
                     toName: '',
+                    value: value,
                 };
 
                 txs.push(val);
@@ -216,12 +217,13 @@ class BlockFinder {
 
             const proposerIdx = committee[0].indexOf(originProposer);
 
-            const block = {
-                number: +number,
-                timestamp: +timestamp,
-                totalTx: transactions.length,
-                proposer: originProposer,
-                reward: 9.6 * 10 ** 18 + 250000000000 * gasUsed + '',
+            const block: Block<TableTitle> = {
+                [TableTitle.block]: +number,
+                [TableTitle.age]: +timestamp,
+                [TableTitle.totalTx]: transactions.length,
+                [TableTitle.proposer]: originProposer,
+                [TableTitle.reward]: 9.6 * 10 ** 18 + 250000000000 * gasUsed + '',
+                [TableTitle.size]: +size,
                 gasUsed: gasUsed,
                 proposerName: proposerIdx === -1 ? '' : committee[1][proposerIdx],
                 txs: txs,

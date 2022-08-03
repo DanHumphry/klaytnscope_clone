@@ -1,4 +1,4 @@
-import { Block, Networks, Txs, PACKET_LAYAR } from 'socket/index.declare';
+import { Networks, Txs, PACKET_LAYAR, Block, TableTitle } from 'socket/index.declare';
 
 interface Network {
     selected: Networks;
@@ -11,7 +11,7 @@ class WebSocketClientModel {
 
     private network: Network = { selected: Networks.Baobab, others: [Networks.Cypress] };
 
-    public blocks: Block[] = [];
+    public blocks: Block<TableTitle>[] = [];
     public txs: Txs[] = [];
 
     constructor(_ws: WebSocket) {

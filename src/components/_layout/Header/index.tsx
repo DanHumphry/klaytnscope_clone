@@ -33,9 +33,9 @@ const Header = ({ selectedPath }: HeaderProps) => {
     };
 
     return (
-        <header className={css.Layout_header}>
+        <header className={css.Layout_header} style={selectedPath !== '/' ? { margin: '0 auto 7rem' } : undefined}>
             <div
-                style={selectedPath === '/' ? { visibility: 'hidden' } : { visibility: 'visible' }}
+                style={selectedPath !== '/' ? { visibility: 'visible' } : { visibility: 'hidden' }}
                 className={css.Header__search__input}
             >
                 <div className={css.Header__search__input__container}>

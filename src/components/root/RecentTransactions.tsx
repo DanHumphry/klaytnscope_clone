@@ -1,15 +1,12 @@
 import cx from 'classnames';
-import Link from 'next/link';
 import css from 'components/root/index.module.scss';
 import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { setBlockHeader } from 'redux/action/actions';
+import { useSelector } from 'react-redux';
 import { RootState } from 'redux/reducers';
-import { Block, Txs } from 'socket/index.declare';
+import { Txs } from 'socket/index.declare';
 import { convertToAge } from 'utils/commonJS';
 
 const RecentTransactions = () => {
-    const dispatch = useDispatch();
     const { wss, blockHeader } = useSelector((state: RootState) => state.networkReducer);
 
     const [blocks, setBlocks] = useState<{ txs: Txs[] }>({ txs: [] });
@@ -18,14 +15,6 @@ const RecentTransactions = () => {
         if (!wss) return;
 
         setBlocks({ txs: wss.txs.slice(-11) });
-
-        wss.addEvent('newBlockHeader', () => {
-            dispatch(setBlockHeader({ blockHeader: wss.blocks[wss.blocks.length - 1] }));
-        });
-
-        return () => {
-            wss.removeEvent('newBlockHeader');
-        };
     }, []);
 
     useEffect(() => {

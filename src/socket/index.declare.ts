@@ -5,12 +5,22 @@ export enum Networks {
     Cypress = 'Cypress',
 }
 
-export interface Block {
-    number: number;
-    timestamp: number;
-    totalTx: number;
-    proposer: string;
-    reward: string;
+export enum TableTitle {
+    block = 'BLOCK #',
+    age = 'AGE',
+    totalTx = 'TOTAL TXS',
+    proposer = 'BLOCK PROPOSER',
+    reward = 'REWARD(KLAY)',
+    size = 'SIZE(BYTE)',
+}
+
+export interface Block<TableTitle> {
+    [TableTitle.block]: number;
+    [TableTitle.age]: number;
+    [TableTitle.totalTx]: number;
+    [TableTitle.proposer]: string;
+    [TableTitle.reward]: string;
+    [TableTitle.size]: number;
     gasUsed: string;
     proposerName: string;
     txs: Txs[];
@@ -25,6 +35,7 @@ export interface Txs {
     txCategory: string;
     fromName: string;
     toName: string;
+    value: string;
 }
 
 export interface PACKET_LAYAR {
