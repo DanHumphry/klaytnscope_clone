@@ -24,7 +24,7 @@ router.get('/', (req: TypedRequestQuery<{ limit: string; page: string; network: 
 
     if (!values.includes(network)) res.status(400).json({ message: 'wrong network' });
     else {
-        const blocks = wss.rooms[network].blockFinder.blockArray;
+        const blocks = wss.getBlockFinder(network).getBlocks();
         const _result = [...blocks].reverse().slice((+page - 1) * +limit, +page * +limit);
 
         res.json({
@@ -45,7 +45,7 @@ router.get('/txs', (req: TypedRequestQuery<{ limit: string; page: string; networ
 
     if (!values.includes(network)) res.status(400).json({ message: 'wrong network' });
     else {
-        const txs = wss.rooms[network].blockFinder.txsArray;
+        const txs = wss.getBlockFinder(network).getTxs();
         const _result = [...txs].reverse().slice((+page - 1) * +limit, +page * +limit);
 
         res.json({

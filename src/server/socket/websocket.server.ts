@@ -15,7 +15,7 @@ const baobabWSEN = 'wss://api.baobab.klaytn.net:8652';
 class WebSocketServerModel {
     private readonly wss: WebSocketServer;
 
-    public rooms: Record<Networks, Network>;
+    private readonly rooms: Record<Networks, Network>;
 
     constructor(option: { server: Server }) {
         this.wss = new WebSocketServer({ server: option.server });
@@ -32,6 +32,10 @@ class WebSocketServerModel {
 
         this.initServerEventHandler();
     }
+
+    public getBlockFinder = (network: Networks): BlockFinder => {
+        return this.rooms[network].blockFinder;
+    };
 
     private initServerEventHandler = () => {
         this.wss.on('connection', (ws: WebSocket_uuid) => {
@@ -51,7 +55,7 @@ class WebSocketServerModel {
         });
 
         this.wss.on('newBlock', (network: Networks) => {
-            this.broadcastByNetwork('newBlock', network, this.rooms[network].blockFinder.blockHeader);
+            this.broadcastByNetwork('newBlock', network, this.rooms[network].blockFinder.getBlockHeader());
         });
     };
 
@@ -69,11 +73,8 @@ class WebSocketServerModel {
             ws,
             'initBlocks',
             {
-                blocks: this.rooms[data.network].blockFinder.blockArray.slice(-11),
-                txs: this.rooms[data.network].blockFinder.blockArray
-                    .map((item) => item.txs)
-                    .flat()
-                    .slice(-11),
+                blocks: this.rooms[data.network].blockFinder.getBlocks().slice(-11),
+                txs: this.rooms[data.network].blockFinder.getTxs().slice(-11),
             },
             data.network,
         );
@@ -146,17 +147,18 @@ class WebSocketServerModel {
 }
 
 class BlockFinder {
-    private network: Networks;
-    private wss: WebSocketServer;
+    private readonly network: Networks;
+    private readonly wss: WebSocketServer;
 
-    public blockArray: Block<TableTitle>[] = [];
-    public txsArray: TransactionForRPC[] | any = [];
-    public blockHeader: Block<TableTitle> | undefined = undefined;
-    protected collectorTimeoutObj: NodeJS.Timeout | null = null;
+    protected readonly caver: Caver;
+
+    private blockArray: Block<TableTitle>[] = [];
+    private txsArray: TransactionForRPC[] | any = [];
+
+    private collectorTimeoutObj: NodeJS.Timeout | null = null;
     private collectorInterval: number = 0;
-    protected blockWithConsensusInfoQueue: Queue = new Queue();
 
-    protected caver: Caver;
+    private blockNumberQueue: Queue = new Queue();
 
     constructor(provider: { url: string; network: Networks }, wss: WebSocketServer) {
         this.network = provider.network;
@@ -166,6 +168,10 @@ class BlockFinder {
 
         this.initialize(provider.url);
     }
+
+    public getBlocks = (): Block<TableTitle>[] => this.blockArray;
+    public getTxs = (): TransactionForRPC[] | any => this.txsArray;
+    public getBlockHeader = (): Block<TableTitle> | undefined => this.blockArray[this.blockArray.length - 1];
 
     protected initialize = (wsProvider: string) => {
         const web3 = new Web3(wsProvider);
@@ -178,18 +184,18 @@ class BlockFinder {
     };
 
     private blockListener = (block: BlockHeader): void => {
-        this.blockWithConsensusInfoQueue.enqueue(block.number);
+        this.blockNumberQueue.enqueue(block.number);
 
         if (!this.collectorTimeoutObj) this.collectorTimeoutObj = setTimeout(this.collector, this.collectorInterval);
     };
 
     private collector = async (): Promise<void> => {
-        if (this.blockWithConsensusInfoQueue.getLength() === 0) {
+        if (this.blockNumberQueue.getLength() === 0) {
             this.collectorTimeoutObj = null;
             return;
         }
 
-        const blockNumber = this.blockWithConsensusInfoQueue.dequeue();
+        const blockNumber = this.blockNumberQueue.dequeue();
 
         try {
             const receipts = await this.caver.klay.getBlockWithConsensusInfo(blockNumber);
@@ -229,16 +235,15 @@ class BlockFinder {
                 txs: txs,
             };
 
-            this.blockHeader = block;
             this.blockArray.push(block);
             this.wss.emit('newBlock', this.network);
         } catch (e: any) {
             if (e.message.indexOf('the block does not exist')) {
                 this.collectorInterval += 100;
-                this.blockWithConsensusInfoQueue.unShift(blockNumber);
+                this.blockNumberQueue.unShift(blockNumber);
             } else console.error(e);
         } finally {
-            if (this.blockWithConsensusInfoQueue.getLength() !== 0) {
+            if (this.blockNumberQueue.getLength() !== 0) {
                 this.collectorTimeoutObj = setTimeout(this.collector, this.collectorInterval);
             } else this.collectorTimeoutObj = null;
         }
