@@ -1,27 +1,88 @@
-import { Networks, Txs, PACKET_LAYAR, Block, TableTitle } from 'socket/index.declare';
+import {
+    CLIENT_PACKET_LAYER,
+    ClientInitValues,
+    ClientMessageType,
+    Networks,
+    ReceivedServerInitValues,
+    SERVER_PACKET_LAYER,
+    ServerMessageType,
+} from 'socket/index.declare';
 
-interface Network {
-    selected: Networks;
-    others: Networks[];
+class ClientWebSocketStorage {
+    protected clientValues: ClientInitValues = {
+        [ClientMessageType.network]: {
+            selected: (localStorage.getItem('network') as Networks) || Networks.Baobab,
+            all: Object.values(Networks),
+        },
+    };
+
+    public getClientValues = <T extends keyof ClientInitValues>(type: T) => {
+        return this.clientValues[type];
+    };
+
+    public setClientValues = <T extends keyof ClientInitValues>(type: T, value: any) => {
+        this.clientValues[type] = value;
+
+        document.dispatchEvent(new Event(type));
+    };
 }
 
-class WebSocketClientModel {
-    private ws: WebSocket;
-    private _uuid: string | undefined;
+class ServerWebsocketStorage extends ClientWebSocketStorage {
+    protected ws: WebSocket;
 
-    private network: Network = { selected: Networks.Baobab, others: [Networks.Cypress] };
+    protected receivedServerValues: ReceivedServerInitValues = {
+        [ServerMessageType.initBlocks]: { blocks: [], txs: [] },
+        [ServerMessageType.newBlock]: undefined,
+    };
 
-    public blocks: Block<TableTitle>[] = [];
-    public txs: Txs[] = [];
+    private eventEmitterDependency: Record<string, string> = {};
 
     constructor(_ws: WebSocket) {
+        super();
+
         this.ws = _ws;
+    }
+
+    public getServerValue = <T extends keyof ReceivedServerInitValues>(type: T): ReceivedServerInitValues[T] => {
+        return this.receivedServerValues[type];
+    };
+
+    public sendMessage = (type: ClientMessageType, data: any = null): void => {
+        if (this.ws.readyState !== this.ws.OPEN) throw new Error('** WebSocket is Close **');
+
+        const _packet: CLIENT_PACKET_LAYER = { type, network: this.clientValues.network.selected, data };
+
+        this.ws.send(JSON.stringify(_packet));
+    };
+
+    public initializedDependency = <T extends keyof ReceivedServerInitValues>(type: T) => {
+        this.eventEmitterDependency[type] = '';
+    };
+
+    public eventListener = <T extends keyof ReceivedServerInitValues>(name: T, listener: () => void) => {
+        this.ws.addEventListener(name, listener);
+    };
+
+    public removeEventListener = <T extends keyof ReceivedServerInitValues>(name: T) => {
+        this.ws.removeEventListener(name, () => {});
+    };
+
+    protected eventEmitter = (_data: SERVER_PACKET_LAYER, msg: string) => {
+        if (this.eventEmitterDependency[ServerMessageType[_data.type]] !== msg) {
+            this.eventEmitterDependency[ServerMessageType[_data.type]] = msg;
+            this.ws.dispatchEvent(new Event(ServerMessageType[_data.type]));
+        }
+    };
+}
+
+class WebSocketClientModel extends ServerWebsocketStorage {
+    private uuid: string | undefined;
+
+    constructor(_ws: WebSocket) {
+        super(_ws);
 
         this.initialize();
     }
-
-    public getNetwork = (): Network => this.network;
-    public setNetwork = (network: Network) => (this.network = network);
 
     private initialize = (): void => {
         //register EventHandler
@@ -29,14 +90,6 @@ class WebSocketClientModel {
         this.ws.onclose = this.handleClose;
         this.ws.onerror = this.handleError;
         this.ws.onmessage = this.handleOnMessage;
-    };
-
-    public sendMessage = (type: string, data: any = null, prevNetwork?: Networks): void => {
-        if (this.ws.readyState !== this.ws.OPEN) throw new Error('** WebSocket is Close **');
-
-        const _packet: PACKET_LAYAR = { type, network: this.network.selected, data, prevNetwork };
-
-        this.ws.send(JSON.stringify(_packet));
     };
 
     private handleOpen = (e: Event): void => {
@@ -62,33 +115,30 @@ class WebSocketClientModel {
     };
 
     private handleOnMessage = (msg: { data: string }): void => {
-        const _data: PACKET_LAYAR = JSON.parse(msg.data);
+        const _data: SERVER_PACKET_LAYER = JSON.parse(msg.data);
 
         switch (_data.type) {
-            case 'connected':
-                this._uuid = _data.data;
+            case ServerMessageType.connected:
+                this.uuid = _data.data;
                 break;
-            case 'initBlocks':
-                this.blocks = _data.data.blocks;
-                this.txs = _data.data.txs;
+            case ServerMessageType.initBlocks:
+                this.receivedServerValues[ServerMessageType.initBlocks] = _data.data;
                 break;
-            case 'newBlock':
-                this.blocks.push(_data.data);
-                if (_data.data.txs.length) this.txs = [...this.txs, ..._data.data.txs];
-                this.ws.dispatchEvent(new Event('newBlockHeader'));
+            case ServerMessageType.newBlock:
+                this.receivedServerValues[ServerMessageType.newBlock] = _data.data;
+
+                this.receivedServerValues[ServerMessageType.initBlocks].blocks.push(_data.data);
+                if (_data.data.txs.length !== 0) {
+                    const prevTxs = [...this.receivedServerValues[ServerMessageType.initBlocks].txs];
+                    this.receivedServerValues[ServerMessageType.initBlocks].txs = [...prevTxs, _data.data.txs];
+                }
                 break;
 
             default:
                 break;
         }
-    };
 
-    public addEvent = (name: string, listener: () => void) => {
-        this.ws.addEventListener(name, listener);
-    };
-
-    public removeEvent = (name: string) => {
-        this.ws.removeEventListener(name, () => {});
+        this.eventEmitter(_data, msg.data);
     };
 }
 

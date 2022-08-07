@@ -1,41 +1,25 @@
 import cx from 'classnames';
 import css from 'components/root/index.module.scss';
 import Link from 'next/link';
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { setBlockHeader } from 'redux/action/actions';
+import React, { useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import { RootState } from 'redux/reducers';
-import { Block, Txs, TableTitle } from 'socket/index.declare';
+import { ServerMessageType, TableTitle } from 'socket/index.declare';
 import { convertToAge, convertToKlayByFixed } from 'utils/commonJS';
 
 const RecentBlocks = () => {
-    const dispatch = useDispatch();
-    const { wss, blockHeader } = useSelector((state: RootState) => state.networkReducer);
-
-    const [blocks, setBlocks] = useState<{ blocks: Block<TableTitle>[]; txs: Txs[] }>({
-        blocks: [],
-        txs: [],
-    });
+    const wss = useSelector((state: RootState) => state.networkReducer.wss);
+    const blocks = wss.getServerValue(ServerMessageType.initBlocks);
 
     useEffect(() => {
-        if (!wss) return;
-
-        setBlocks({ blocks: wss.blocks.slice(-11), txs: wss.txs.slice(-11) });
-
-        wss.addEvent('newBlockHeader', () => {
-            dispatch(setBlockHeader({ blockHeader: wss.blocks[wss.blocks.length - 1] }));
+        wss.eventListener(ServerMessageType.newBlock, () => {
+            console.log('new Block');
         });
 
         return () => {
-            wss.removeEvent('newBlockHeader');
+            wss.removeEventListener(ServerMessageType.newBlock);
         };
     }, []);
-
-    useEffect(() => {
-        if (!wss || !blockHeader) return;
-
-        setBlocks({ blocks: wss.blocks.slice(-11), txs: wss.txs.slice(-11) });
-    }, [blockHeader]);
 
     return (
         <div className={css.MainListBox}>

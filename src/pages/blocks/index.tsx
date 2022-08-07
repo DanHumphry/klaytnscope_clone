@@ -1,46 +1,53 @@
 import axios from 'axios';
-import Index from 'components/table';
+import BlockTable from 'components/table';
+import useClientStorage from 'hooks/socket/useClientStorage';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from 'redux/reducers';
-import { Block, TableTitle } from 'socket/index.declare';
+import { Block, ClientMessageType, TableTitle } from 'socket/index.declare';
 import { serverHost } from 'utils/variables';
+
+export interface ReturnBlocks {
+    limit: number;
+    page: number;
+    result: Block[];
+    total: number;
+}
 
 const Blocks: NextPage = () => {
     const wss = useSelector((state: RootState) => state.networkReducer.wss);
     const router = useRouter();
 
-    const [blocks, setBlocks] = useState<Block<TableTitle>[]>([]);
+    const [network] = useClientStorage(ClientMessageType.network);
+
+    const [data, setData] = useState<ReturnBlocks>({ limit: 0, page: 0, result: [], total: 0 });
 
     useEffect(() => {
         if (typeof window === 'undefined' || !wss) return;
 
-        let query = '';
+        let query: string = '';
 
         if (router.query.page) query += `&page=${router.query.page}`;
         if (router.query.limit) query += `&limit=${router.query.limit}`;
 
         axios
-            .get(`${serverHost}/block?network=${wss.getNetwork().selected}${query}`)
-            .then((res) => {
-                console.log(res.data.result.length);
-                setBlocks(res.data.result);
-            })
-            .catch(console.log);
+            .get(`${serverHost}/block?network=${network}${query}`)
+            .then((res) => setData(res.data))
+            .catch(console.error);
     }, [router.query]);
 
     return (
-        <Index
-            data={blocks}
+        <BlockTable
+            data={data}
             table={[
-                { title: TableTitle.block, width: 13 },
-                { title: TableTitle.age, width: 20 },
-                { title: TableTitle.totalTx, width: 17 },
-                { title: TableTitle.proposer, width: 25 },
-                { title: TableTitle.reward, width: 13 },
-                { title: TableTitle.size, width: 13 },
+                { th: TableTitle.block, width: 13 },
+                { th: TableTitle.age, width: 20 },
+                { th: TableTitle.totalTx, width: 17 },
+                { th: TableTitle.proposer, width: 25 },
+                { th: TableTitle.reward, width: 13, style: { textAlign: 'right' } },
+                { th: TableTitle.size, width: 13, style: { textAlign: 'right' } },
             ]}
         />
     );

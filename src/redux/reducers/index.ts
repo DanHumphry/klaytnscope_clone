@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux';
-import networkReducer from 'redux/reducers/network';
+import networkReducer from 'redux/reducers/sockets';
 
 export const rootReducer = combineReducers({
     networkReducer: networkReducer,

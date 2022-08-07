@@ -3,25 +3,22 @@ import css from 'components/root/index.module.scss';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from 'redux/reducers';
-import { Txs } from 'socket/index.declare';
+import { ServerMessageType, Txs } from 'socket/index.declare';
 import { convertToAge } from 'utils/commonJS';
 
 const RecentTransactions = () => {
-    const { wss, blockHeader } = useSelector((state: RootState) => state.networkReducer);
-
-    const [blocks, setBlocks] = useState<{ txs: Txs[] }>({ txs: [] });
+    const wss = useSelector((state: RootState) => state.networkReducer.wss);
+    const blocks = wss.getServerValue(ServerMessageType.initBlocks);
 
     useEffect(() => {
-        if (!wss) return;
+        wss.eventListener(ServerMessageType.newBlock, () => {
+            console.log('new Block');
+        });
 
-        setBlocks({ txs: wss.txs.slice(-11) });
+        return () => {
+            wss.removeEventListener(ServerMessageType.newBlock);
+        };
     }, []);
-
-    useEffect(() => {
-        if (!wss || !blockHeader) return;
-
-        setBlocks({ txs: wss.txs.slice(-11) });
-    }, [blockHeader]);
 
     return (
         <div className={css.MainListBox}>

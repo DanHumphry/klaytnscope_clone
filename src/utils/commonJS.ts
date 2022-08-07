@@ -41,5 +41,14 @@ export const convertToKlayByFixed = (peb: string, fixed: number = 6): string => 
 export const convertToAge = (timeStamp: number): string => {
     const passedTime = Math.floor(Date.now() / 1000 - timeStamp);
     if (passedTime < 60) return `${passedTime} sec ago`;
-    else return '';
+    else if (passedTime < 60 * 60) return `${Math.floor(passedTime / 60)} min ago`;
+    else if (passedTime < 60 * 60 * 24) return `${Math.floor(passedTime / (60 * 60))} hours ago`;
+    else return `${Math.floor(passedTime / (60 * 60 * 24))} days ago`;
+};
+
+export const numberWithCommas = (number: number) => {
+    let _number = String(number);
+    if (number === 0) _number = '0.00';
+
+    return _number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 };

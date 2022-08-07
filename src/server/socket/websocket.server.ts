@@ -94,7 +94,7 @@ class WebSocketServerModel {
         this.enterRooms(ws, data);
     };
 
-    private broadcastByNetwork = (type: string, network: Networks, data: Block<TableTitle> | undefined) => {
+    private broadcastByNetwork = (type: string, network: Networks, data: Block | undefined) => {
         const _packet: PACKET_LAYAR = { type, network, data };
 
         for (const client of Array.from(this.rooms[network].clients.values())) {
@@ -152,7 +152,7 @@ class BlockFinder {
 
     protected readonly caver: Caver;
 
-    private blockArray: Block<TableTitle>[] = [];
+    private blockArray: Block[] = [];
     private txsArray: TransactionForRPC[] | any = [];
 
     private collectorTimeoutObj: NodeJS.Timeout | null = null;
@@ -169,11 +169,11 @@ class BlockFinder {
         this.initialize(provider.url);
     }
 
-    public getBlocks = (): Block<TableTitle>[] => this.blockArray;
+    public getBlocks = (): Block[] => this.blockArray;
     public getTxs = (): TransactionForRPC[] | any => this.txsArray;
-    public getBlockHeader = (): Block<TableTitle> | undefined => this.blockArray[this.blockArray.length - 1];
+    public getBlockHeader = (): Block | undefined => this.blockArray[this.blockArray.length - 1];
 
-    protected initialize = (wsProvider: string) => {
+    private initialize = (wsProvider: string) => {
         const web3 = new Web3(wsProvider);
 
         setInterval(() => {
@@ -223,7 +223,7 @@ class BlockFinder {
 
             const proposerIdx = committee[0].indexOf(originProposer);
 
-            const block: Block<TableTitle> = {
+            const block: Block = {
                 [TableTitle.block]: +number,
                 [TableTitle.age]: +timestamp,
                 [TableTitle.totalTx]: transactions.length,
