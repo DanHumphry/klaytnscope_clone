@@ -1,20 +1,16 @@
 import {
     CLIENT_PACKET_LAYER,
+    clientInitValues,
     ClientInitValues,
     ClientMessageType,
-    Networks,
+    receivedServerInitValues,
     ReceivedServerInitValues,
     SERVER_PACKET_LAYER,
     ServerMessageType,
 } from 'socket/index.declare';
 
 class ClientWebSocketStorage {
-    protected clientValues: ClientInitValues = {
-        [ClientMessageType.network]: {
-            selected: (localStorage.getItem('network') as Networks) || Networks.Baobab,
-            all: Object.values(Networks),
-        },
-    };
+    protected clientValues: ClientInitValues = clientInitValues;
 
     public getClientValues = <T extends keyof ClientInitValues>(type: T) => {
         return this.clientValues[type];
@@ -29,13 +25,8 @@ class ClientWebSocketStorage {
 
 class ServerWebsocketStorage extends ClientWebSocketStorage {
     protected ws: WebSocket;
-
-    protected receivedServerValues: ReceivedServerInitValues = {
-        [ServerMessageType.initBlocks]: { blocks: [], txs: [] },
-        [ServerMessageType.newBlock]: undefined,
-    };
-
-    private eventEmitterDependency: Record<string, string> = {};
+    protected receivedServerValues: ReceivedServerInitValues = receivedServerInitValues;
+    protected eventEmitterDependency: Record<string, string> = {};
 
     constructor(_ws: WebSocket) {
         super();
@@ -55,10 +46,6 @@ class ServerWebsocketStorage extends ClientWebSocketStorage {
         this.ws.send(JSON.stringify(_packet));
     };
 
-    public initializedDependency = <T extends keyof ReceivedServerInitValues>(type: T) => {
-        this.eventEmitterDependency[type] = '';
-    };
-
     public eventListener = <T extends keyof ReceivedServerInitValues>(name: T, listener: () => void) => {
         this.ws.addEventListener(name, listener);
     };
@@ -67,10 +54,10 @@ class ServerWebsocketStorage extends ClientWebSocketStorage {
         this.ws.removeEventListener(name, () => {});
     };
 
-    protected eventEmitter = (_data: SERVER_PACKET_LAYER, msg: string) => {
-        if (this.eventEmitterDependency[ServerMessageType[_data.type]] !== msg) {
-            this.eventEmitterDependency[ServerMessageType[_data.type]] = msg;
-            this.ws.dispatchEvent(new Event(ServerMessageType[_data.type]));
+    protected eventEmitter = (type: ServerMessageType, msg: string) => {
+        if (this.eventEmitterDependency[type] !== msg) {
+            this.eventEmitterDependency[type] = msg;
+            this.ws.dispatchEvent(new Event(type));
         }
     };
 }
@@ -138,7 +125,7 @@ class WebSocketClientModel extends ServerWebsocketStorage {
                 break;
         }
 
-        this.eventEmitter(_data, msg.data);
+        this.eventEmitter(_data.type, msg.data);
     };
 }
 

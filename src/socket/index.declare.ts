@@ -25,12 +25,28 @@ export interface ReceivedServerInitValues {
     [ServerMessageType.newBlock]: Block | undefined;
 }
 
+export const receivedServerInitValues: ReceivedServerInitValues = {
+    [ServerMessageType.initBlocks]: {
+        blocks: [],
+        txs: [],
+    },
+    [ServerMessageType.newBlock]: undefined,
+};
+
 export interface ClientInitValues {
     [ClientMessageType.network]: {
         selected: Networks;
         all: Networks[];
     };
 }
+
+export const clientInitValues: ClientInitValues = {
+    [ClientMessageType.network]: {
+        selected: Networks.Baobab,
+        // selected: (typeof window !== 'undefined' && (localStorage.getItem('network') as Networks)) || Networks.Baobab,
+        all: Object.values(Networks),
+    },
+};
 
 export enum TableTitle {
     block = 'BLOCK #',

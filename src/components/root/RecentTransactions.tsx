@@ -1,24 +1,12 @@
 import cx from 'classnames';
 import css from 'components/root/index.module.scss';
-import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { RootState } from 'redux/reducers';
-import { ServerMessageType, Txs } from 'socket/index.declare';
+import useServerStorage from 'hooks/socket/useServerStorage';
+import React from 'react';
+import { ServerMessageType } from 'socket/index.declare';
 import { convertToAge } from 'utils/commonJS';
 
 const RecentTransactions = () => {
-    const wss = useSelector((state: RootState) => state.networkReducer.wss);
-    const blocks = wss.getServerValue(ServerMessageType.initBlocks);
-
-    useEffect(() => {
-        wss.eventListener(ServerMessageType.newBlock, () => {
-            console.log('new Block');
-        });
-
-        return () => {
-            wss.removeEventListener(ServerMessageType.newBlock);
-        };
-    }, []);
+    const blocks = useServerStorage(ServerMessageType.initBlocks);
 
     return (
         <div className={css.MainListBox}>

@@ -1,13 +1,22 @@
+import Caver, { TransactionForRPC } from 'caver-js';
 import { Server } from 'http';
+import { v4 as uuidv4 } from 'uuid';
+import Web3 from 'web3';
 import { BlockHeader } from 'web3-eth';
 import { WebSocketServer } from 'ws';
-import Caver, { TransactionForRPC } from 'caver-js';
-import Web3 from 'web3';
-import { v4 as uuidv4 } from 'uuid';
+import {
+    Block,
+    CLIENT_PACKET_LAYER,
+    ClientMessageType,
+    Networks,
+    SERVER_PACKET_LAYER,
+    ServerMessageType,
+    TableTitle,
+    WebSocket_uuid,
+} from '../../socket/index.declare';
 
 import { Queue } from '../../utils/commonJS';
 import { committee } from '../../utils/variables';
-import { Block, Networks, PACKET_LAYAR, WebSocket_uuid, TableTitle } from '../../socket/index.declare';
 
 const cypressWSEN = 'wss://public-node-api.klaytnapi.com/v1/cypress/ws';
 const baobabWSEN = 'wss://api.baobab.klaytn.net:8652';
@@ -54,24 +63,28 @@ class WebSocketServerModel {
             ws.send(JSON.stringify(_packet));
         });
 
-        this.wss.on('newBlock', (network: Networks) => {
-            this.broadcastByNetwork('newBlock', network, this.rooms[network].blockFinder.getBlockHeader());
+        this.wss.on(ServerMessageType.newBlock, (network: Networks) => {
+            this.broadcastByNetwork(
+                ServerMessageType.newBlock,
+                network,
+                this.rooms[network].blockFinder.getBlockHeader(),
+            );
         });
     };
 
-    private sendMessage = (ws: WebSocket_uuid, type: string, data: any, network: Networks): void => {
+    private sendMessage = (ws: WebSocket_uuid, type: ServerMessageType, data: any, network: Networks): void => {
         if (ws.readyState !== ws.OPEN) throw new Error('** WebSocket is Close **');
 
-        const _packet: PACKET_LAYAR = { type, network, data };
+        const _packet: SERVER_PACKET_LAYER = { type, network, data };
 
         ws.send(JSON.stringify(_packet));
     };
 
-    private enterRooms = (ws: WebSocket_uuid, data: PACKET_LAYAR) => {
+    private enterRooms = (ws: WebSocket_uuid, data: CLIENT_PACKET_LAYER) => {
         this.rooms[data.network].clients.set(ws._uuid, ws);
         this.sendMessage(
             ws,
-            'initBlocks',
+            ServerMessageType.initBlocks,
             {
                 blocks: this.rooms[data.network].blockFinder.getBlocks().slice(-11),
                 txs: this.rooms[data.network].blockFinder.getTxs().slice(-11),
@@ -80,22 +93,17 @@ class WebSocketServerModel {
         );
     };
 
-    private leaveRooms = (ws: WebSocket_uuid, data: PACKET_LAYAR) => {
-        if (data.prevNetwork) this.rooms[data.prevNetwork].clients.delete(ws._uuid);
-        else {
-            for (const network of Object.values(this.rooms)) {
-                network.clients.delete(ws._uuid);
-            }
-        }
+    private leaveRooms = (ws: WebSocket_uuid) => {
+        for (const network of Object.values(this.rooms)) network.clients.delete(ws._uuid);
     };
 
-    private setNetwork = (ws: WebSocket_uuid, data: PACKET_LAYAR) => {
-        this.leaveRooms(ws, data);
+    private setNetwork = (ws: WebSocket_uuid, data: CLIENT_PACKET_LAYER) => {
+        this.leaveRooms(ws);
         this.enterRooms(ws, data);
     };
 
-    private broadcastByNetwork = (type: string, network: Networks, data: Block | undefined) => {
-        const _packet: PACKET_LAYAR = { type, network, data };
+    private broadcastByNetwork = (type: ServerMessageType, network: Networks, data: Block | undefined) => {
+        const _packet: SERVER_PACKET_LAYER = { type, network, data };
 
         for (const client of Array.from(this.rooms[network].clients.values())) {
             client.send(JSON.stringify(_packet));
@@ -106,16 +114,16 @@ class WebSocketServerModel {
         return {
             message: () =>
                 ws.on('message', async (data: any) => {
-                    const _data: PACKET_LAYAR = JSON.parse(data);
+                    const _data: CLIENT_PACKET_LAYER = JSON.parse(data);
 
                     switch (_data.type) {
-                        case 'enterRooms':
+                        case ClientMessageType.enterRooms:
                             this.enterRooms(ws, _data);
                             break;
-                        case 'leaveRooms':
-                            this.leaveRooms(ws, _data);
+                        case ClientMessageType.leaveRooms:
+                            this.leaveRooms(ws);
                             break;
-                        case 'setNetwork':
+                        case ClientMessageType.network:
                             this.setNetwork(ws, _data);
                             break;
 
