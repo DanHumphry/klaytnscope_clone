@@ -8,6 +8,7 @@ import {
     SERVER_PACKET_LAYER,
     ServerMessageType,
 } from 'socket/index.declare';
+import { webSocketHost } from 'utils/variables';
 
 class ClientWebSocketStorage {
     protected clientValues: ClientInitValues = clientInitValues;
@@ -54,7 +55,7 @@ class ServerWebsocketStorage extends ClientWebSocketStorage {
         this.ws.removeEventListener(name, () => {});
     };
 
-    protected eventEmitter = (type: ServerMessageType, msg: string) => {
+    public eventEmitter = (type: ServerMessageType, msg: string) => {
         if (this.eventEmitterDependency[type] !== msg) {
             this.eventEmitterDependency[type] = msg;
             this.ws.dispatchEvent(new Event(type));
@@ -64,6 +65,7 @@ class ServerWebsocketStorage extends ClientWebSocketStorage {
 
 class WebSocketClientModel extends ServerWebsocketStorage {
     private uuid: string | undefined;
+    public isHealthy: boolean = false;
 
     constructor(_ws: WebSocket) {
         super(_ws);
@@ -80,10 +82,12 @@ class WebSocketClientModel extends ServerWebsocketStorage {
     };
 
     private handleOpen = (e: Event): void => {
+        this.isHealthy = true;
         console.log('Connected WebSocket >>');
     };
 
     private handleClose = (e: CloseEvent): void => {
+        this.isHealthy = false;
         console.log('Closed WebSocket >>');
 
         const _interval = setInterval(() => {
@@ -117,8 +121,9 @@ class WebSocketClientModel extends ServerWebsocketStorage {
                 this.receivedServerValues[ServerMessageType.initBlocks].blocks.push(_data.data);
                 if (_data.data.txs.length !== 0) {
                     const prevTxs = [...this.receivedServerValues[ServerMessageType.initBlocks].txs];
-                    this.receivedServerValues[ServerMessageType.initBlocks].txs = [...prevTxs, _data.data.txs];
+                    this.receivedServerValues[ServerMessageType.initBlocks].txs = [...prevTxs, ..._data.data.txs];
                 }
+                this.eventEmitter(ServerMessageType.initBlocks, msg.data);
                 break;
 
             default:
@@ -129,4 +134,6 @@ class WebSocketClientModel extends ServerWebsocketStorage {
     };
 }
 
-export default WebSocketClientModel;
+export default typeof window !== 'undefined' ? new WebSocketClientModel(new WebSocket(webSocketHost)) : null;
+
+// export default WebSocketClientModel;

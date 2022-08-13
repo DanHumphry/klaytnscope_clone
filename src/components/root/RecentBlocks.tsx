@@ -2,7 +2,7 @@ import cx from 'classnames';
 import css from 'components/root/index.module.scss';
 import useServerStorage from 'hooks/socket/useServerStorage';
 import Link from 'next/link';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { ServerMessageType, TableTitle } from 'socket/index.declare';
 import { convertToAge, convertToKlayByFixed } from 'utils/commonJS';
 
@@ -31,46 +31,49 @@ const RecentBlocks = () => {
                                 </div>
                             </div>
                             <div className={css.Table__tbody}>
-                                {[...blocks.blocks].reverse().map((item) => {
-                                    return (
-                                        <div className={css.Table__tr} key={item[TableTitle.block]}>
-                                            <div className={cx(css.Table__td, css.MainList__table__number)}>
-                                                <span className={css.numberData}>{item[TableTitle.block]}</span>
-                                            </div>
-                                            <div className={cx(css.Table__td, css.MainList__table__timestamp)}>
-                                                <span className={css.TimeDelta}>
-                                                    {convertToAge(item[TableTitle.age])}
-                                                </span>
-                                            </div>
-                                            <div className={cx(css.Table__td, css.MainList__table__totalTx)}>
-                                                <span className={css.numberData}>{item[TableTitle.totalTx]}</span>
-                                            </div>
-                                            <div className={cx(css.Table__td, css.MainList__table__proposer)}>
+                                {[...blocks.blocks]
+                                    .slice(-11)
+                                    .reverse()
+                                    .map((item) => {
+                                        return (
+                                            <div className={css.Table__tr} key={item[TableTitle.block]}>
+                                                <div className={cx(css.Table__td, css.MainList__table__number)}>
+                                                    <span className={css.numberData}>{item[TableTitle.block]}</span>
+                                                </div>
+                                                <div className={cx(css.Table__td, css.MainList__table__timestamp)}>
+                                                    <span className={css.TimeDelta}>
+                                                        {convertToAge(item[TableTitle.age])}
+                                                    </span>
+                                                </div>
+                                                <div className={cx(css.Table__td, css.MainList__table__totalTx)}>
+                                                    <span className={css.numberData}>{item[TableTitle.totalTx]}</span>
+                                                </div>
+                                                <div className={cx(css.Table__td, css.MainList__table__proposer)}>
+                                                    <div
+                                                        className={cx(
+                                                            css.CroppedTxWithLink,
+                                                            css.CroppedTxWithLink__address,
+                                                        )}
+                                                    >
+                                                        <Link href={`/contract/${item[TableTitle.proposer]}`}>
+                                                            {item.proposerName}
+                                                        </Link>
+                                                    </div>
+                                                </div>
                                                 <div
                                                     className={cx(
-                                                        css.CroppedTxWithLink,
-                                                        css.CroppedTxWithLink__address,
+                                                        css.Table__td,
+                                                        css.Table__td__right,
+                                                        css.MainList__table__reward,
                                                     )}
                                                 >
-                                                    <Link href={`/contract/${item[TableTitle.proposer]}`}>
-                                                        {item.proposerName}
-                                                    </Link>
+                                                    <span className={css.numberData}>
+                                                        {convertToKlayByFixed(item[TableTitle.reward])}
+                                                    </span>
                                                 </div>
                                             </div>
-                                            <div
-                                                className={cx(
-                                                    css.Table__td,
-                                                    css.Table__td__right,
-                                                    css.MainList__table__reward,
-                                                )}
-                                            >
-                                                <span className={css.numberData}>
-                                                    {convertToKlayByFixed(item[TableTitle.reward])}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
+                                        );
+                                    })}
                             </div>
                         </div>
                     </div>
@@ -80,4 +83,4 @@ const RecentBlocks = () => {
     );
 };
 
-export default RecentBlocks;
+export default React.memo(RecentBlocks);

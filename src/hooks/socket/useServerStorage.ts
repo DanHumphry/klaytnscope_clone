@@ -1,25 +1,22 @@
 import { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { RootState } from 'redux/reducers';
+
 import { ReceivedServerInitValues, receivedServerInitValues } from 'socket/index.declare';
+import wsc from 'socket/websocket.client';
 
 const useServerStorage = <T extends keyof ReceivedServerInitValues>(type: T): ReceivedServerInitValues[T] => {
-    const wss = useSelector((store: RootState) => store.networkReducer.wss);
+    if (typeof window === 'undefined' || !wsc) return receivedServerInitValues[type];
 
-    if (typeof window === 'undefined' || !wss) return receivedServerInitValues[type];
-
-    const [state, setState] = useState<ReceivedServerInitValues[T]>(wss.getServerValue(type));
+    const [state, setState] = useState<ReceivedServerInitValues[T]>(wsc.getServerValue(type));
 
     useEffect(() => {
-        wss.eventListener(type, () => {
-            console.log(type);
-            setState(wss.getServerValue(type));
+        wsc.eventListener(type, () => {
+            setState({ ...wsc.getServerValue(type) });
         });
 
         return () => {
-            wss.removeEventListener(type);
+            wsc.removeEventListener(type);
         };
-    }, []);
+    }, [wsc.isHealthy]);
 
     return state;
 };

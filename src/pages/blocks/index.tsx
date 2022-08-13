@@ -1,13 +1,12 @@
 import axios from 'axios';
-import BlockTable from 'components/table';
-import useClientStorage from 'hooks/socket/useClientStorage';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { RootState } from 'redux/reducers';
+
 import { Block, ClientMessageType, TableTitle } from 'socket/index.declare';
 import { serverHost } from 'utils/variables';
+import BlockTable from 'components/table';
+import useClientStorage from 'hooks/socket/useClientStorage';
 
 export interface ReturnBlocks {
     limit: number;
@@ -17,7 +16,6 @@ export interface ReturnBlocks {
 }
 
 const Blocks: NextPage = () => {
-    const wss = useSelector((state: RootState) => state.networkReducer.wss);
     const router = useRouter();
 
     const [network] = useClientStorage(ClientMessageType.network);
@@ -25,7 +23,7 @@ const Blocks: NextPage = () => {
     const [data, setData] = useState<ReturnBlocks>({ limit: 0, page: 0, result: [], total: 0 });
 
     useEffect(() => {
-        if (typeof window === 'undefined' || !wss) return;
+        if (typeof window === 'undefined') return;
 
         let query: string = '';
 

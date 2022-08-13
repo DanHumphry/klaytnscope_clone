@@ -86,8 +86,8 @@ class WebSocketServerModel {
             ws,
             ServerMessageType.initBlocks,
             {
-                blocks: this.rooms[data.network].blockFinder.getBlocks().slice(-11),
-                txs: this.rooms[data.network].blockFinder.getTxs().slice(-11),
+                blocks: this.rooms[data.network].blockFinder.getBlocks(),
+                txs: this.rooms[data.network].blockFinder.getTxs(),
             },
             data.network,
         );

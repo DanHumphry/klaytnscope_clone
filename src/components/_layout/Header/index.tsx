@@ -1,20 +1,17 @@
 import cx from 'classnames';
+import React, { useEffect } from 'react';
 
 import css from 'components/_layout/Header/index.module.scss';
 import useClientStorage from 'hooks/socket/useClientStorage';
 import useTap from 'hooks/useTap';
-import React, { useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import { RootState } from 'redux/reducers';
 import { ClientMessageType, Networks } from 'socket/index.declare';
+import wsc from 'socket/websocket.client';
 
 type HeaderProps = {
     selectedPath: string;
 };
 
 const Header = ({ selectedPath }: HeaderProps) => {
-    const wss = useSelector((state: RootState) => state.networkReducer.wss);
-
     const [networkTap, setNetworkTap] = useTap(false);
     const [networks, setNetworks] = useClientStorage(ClientMessageType.network);
 
@@ -23,12 +20,12 @@ const Header = ({ selectedPath }: HeaderProps) => {
     };
 
     useEffect(() => {
-        if (!wss) return;
+        if (!wsc) return;
 
-        wss.sendMessage(ClientMessageType.enterRooms);
+        wsc.sendMessage(ClientMessageType.enterRooms);
 
         return () => {
-            wss.sendMessage(ClientMessageType.leaveRooms);
+            wsc.sendMessage(ClientMessageType.leaveRooms);
             localStorage.setItem('network', networks.selected);
         };
     }, [networks]);
