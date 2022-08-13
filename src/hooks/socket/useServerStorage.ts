@@ -9,12 +9,14 @@ const useServerStorage = <T extends keyof ReceivedServerInitValues>(type: T): Re
     const [state, setState] = useState<ReceivedServerInitValues[T]>(wsc.getServerValue(type));
 
     useEffect(() => {
+        if (!wsc) return;
+
         wsc.eventListener(type, () => {
-            setState({ ...wsc.getServerValue(type) });
+            if (wsc) setState({ ...wsc.getServerValue(type) });
         });
 
         return () => {
-            wsc.removeEventListener(type);
+            if (wsc) wsc.removeEventListener(type);
         };
     }, [wsc.isHealthy]);
 

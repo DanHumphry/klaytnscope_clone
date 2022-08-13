@@ -10,13 +10,16 @@ const useClientStorage = <T extends keyof ClientInitValues>(
 
     const [state, setState] = useState<ClientInitValues[T]>(wsc.getClientValues(type));
 
-    const dispatch = useCallback((val: ClientInitValues[T]) => {
-        wsc.setClientValues(type, val);
-    }, []);
+    const dispatch = useCallback(
+        (val: ClientInitValues[T]) => {
+            if (wsc) wsc.setClientValues(type, val);
+        },
+        [wsc.isHealthy],
+    );
 
     useEffect(() => {
         document.addEventListener(type, () => {
-            setState({ ...wsc.getClientValues(type) });
+            if (wsc) setState({ ...wsc.getClientValues(type) });
         });
 
         return () => {

@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 
 import { Block, ClientMessageType, TableTitle } from 'socket/index.declare';
-import { serverHost } from 'utils/variables';
+import { HOST_SERVER } from 'utils/variables';
 import BlockTable from 'components/table';
 import useClientStorage from 'hooks/socket/useClientStorage';
 
@@ -31,13 +31,14 @@ const Blocks: NextPage = () => {
         if (router.query.limit) query += `&limit=${router.query.limit}`;
 
         axios
-            .get(`${serverHost}/block?network=${network}${query}`)
+            .get(`${HOST_SERVER}/block?network=${network.selected}${query}`)
             .then((res) => setData(res.data))
             .catch(console.error);
     }, [router.query]);
 
     return (
         <BlockTable
+            title="Blocks"
             data={data}
             table={[
                 { th: TableTitle.block, width: 13 },

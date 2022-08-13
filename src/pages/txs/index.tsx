@@ -3,18 +3,24 @@ import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 
-import { ReturnBlocks } from 'pages/blocks';
-import { ClientMessageType, TableTitle } from 'socket/index.declare';
-import { serverHost } from 'utils/variables';
+import { ClientMessageType, TableTitle, Txs } from 'socket/index.declare';
+import { HOST_SERVER } from 'utils/variables';
 import BlockTable from 'components/table';
 import useClientStorage from 'hooks/socket/useClientStorage';
+
+export interface ReturnTXS {
+    limit: number;
+    page: number;
+    result: Txs[];
+    total: number;
+}
 
 const Txs: NextPage = () => {
     const router = useRouter();
 
     const [network] = useClientStorage(ClientMessageType.network);
 
-    const [data, setData] = useState<ReturnBlocks>({ limit: 0, page: 0, result: [], total: 0 });
+    const [data, setData] = useState<ReturnTXS>({ limit: 0, page: 0, result: [], total: 0 });
 
     useEffect(() => {
         if (typeof window === 'undefined') return;
@@ -24,16 +30,15 @@ const Txs: NextPage = () => {
         if (router.query.page) query += `&page=${router.query.page}`;
         if (router.query.limit) query += `&limit=${router.query.limit}`;
 
-        console.log(query);
-
         axios
-            .get(`${serverHost}/block/txs?network=${network}${query}`)
+            .get(`${HOST_SERVER}/block/txs?network=${network.selected}${query}`)
             .then((res) => setData(res.data))
             .catch(console.error);
     }, [router.query]);
 
     return (
         <BlockTable
+            title="Transactions"
             data={data}
             table={[
                 { th: TableTitle.txHash, width: 15 },

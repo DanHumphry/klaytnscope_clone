@@ -88,6 +88,14 @@ export interface Txs {
     value: string;
 }
 
+export const instanceOfBlock = (object: any): object is Block => {
+    return TableTitle.totalTx in object;
+};
+
+export const instanceOfTxs = (object: any): object is Txs => {
+    return TableTitle.txHash in object;
+};
+
 export interface CLIENT_PACKET_LAYER {
     type: ClientMessageType;
     network: Networks;

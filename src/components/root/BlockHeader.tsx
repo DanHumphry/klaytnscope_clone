@@ -1,6 +1,6 @@
 import css from 'components/root/index.module.scss';
 import useServerStorage from 'hooks/socket/useServerStorage';
-import React from 'react';
+import React, { useRef } from 'react';
 import { ServerMessageType, TableTitle } from 'socket/index.declare';
 
 const BlockHeader = () => {

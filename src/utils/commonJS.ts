@@ -1,5 +1,5 @@
 export class Queue {
-    private items: any[];
+    private readonly items: any[];
 
     constructor(params?: any[]) {
         if (params) this.items = [...params];

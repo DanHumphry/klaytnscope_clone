@@ -1,14 +1,17 @@
 import cx from 'classnames';
-import css from 'components/table/index.module.scss';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { ReturnBlocks } from 'pages/blocks';
 import React, { useEffect, useState } from 'react';
-import { TableTitle } from 'socket/index.declare';
+
+import css from 'components/table/index.module.scss';
+import { ReturnBlocks } from 'pages/blocks';
+import { ReturnTXS } from 'pages/txs';
+import { TableTitle, Block, instanceOfBlock, instanceOfTxs } from 'socket/index.declare';
 import { convertToAge, convertToKlayByFixed, numberWithCommas } from 'utils/commonJS';
 
 interface TableProps {
-    data: ReturnBlocks;
+    title?: string;
+    data: ReturnBlocks | ReturnTXS;
     table: Table[];
 }
 
@@ -18,11 +21,11 @@ interface Table {
     style?: React.CSSProperties;
 }
 
-const Index = ({ data, table }: TableProps) => {
+const Index = ({ title, data, table }: TableProps) => {
     return (
         <div className={css.ListTemplate__common}>
             <header className={css.ListTemplate__header}>
-                <h2 className={css.ListTemplate__title}>Blocks</h2>
+                <h2 className={css.ListTemplate__title}>{title || ''}</h2>
             </header>
             <div className={css.MainList}>
                 <div className={css.ListTemplate__content__isMain}>
@@ -61,91 +64,123 @@ const TableBody = ({ data, table }: TableProps) => {
     return (
         <div className={css.Table__tbody}>
             {data.result.map((item, index) => {
-                return (
-                    <div className={css.Table__tr} key={item[TableTitle.block]}>
-                        {table.map((row, idx) => {
-                            switch (row.th) {
-                                case TableTitle.block:
-                                    return (
-                                        <div
-                                            className={css.Table__td}
-                                            style={{ width: `${row.width}%` }}
-                                            key={`${index}${idx}`}
-                                        >
-                                            <span className={css.numberData}>{item[TableTitle.block]}</span>
-                                        </div>
-                                    );
-                                case TableTitle.age:
-                                    return (
-                                        <div
-                                            className={css.Table__td}
-                                            style={{ width: `${row.width}%` }}
-                                            key={`${index}${idx}`}
-                                        >
-                                            <AgeComponent timestamp={item[TableTitle.age]} />
-                                        </div>
-                                    );
-                                case TableTitle.totalTx:
-                                    return (
-                                        <div
-                                            className={css.Table__td}
-                                            style={{ width: `${row.width}%` }}
-                                            key={`${index}${idx}`}
-                                        >
-                                            <span className={css.numberData}>{item[TableTitle.totalTx]}</span>
-                                        </div>
-                                    );
-
-                                case TableTitle.proposer:
-                                    return (
-                                        <div
-                                            className={css.Table__td}
-                                            style={{ width: `${row.width}%` }}
-                                            key={`${index}${idx}`}
-                                        >
-                                            <div className={cx(css.CroppedTxWithLink, css.CroppedTxWithLink__address)}>
-                                                <Link href={`/contract/${item[TableTitle.proposer]}`}>
-                                                    {item.proposerName}
-                                                </Link>
+                if (instanceOfBlock(item)) {
+                    return (
+                        <div className={css.Table__tr} key={item[TableTitle.block]}>
+                            {table.map((row, idx) => {
+                                switch (row.th) {
+                                    case TableTitle.block:
+                                        return (
+                                            <div
+                                                className={css.Table__td}
+                                                style={{ width: `${row.width}%` }}
+                                                key={`${index}${idx}`}
+                                            >
+                                                <span className={css.numberData}>{item[TableTitle.block]}</span>
                                             </div>
-                                        </div>
-                                    );
-                                case TableTitle.reward:
-                                    return (
-                                        <div
-                                            className={cx(css.Table__td, css.Table__td__right)}
-                                            style={{ width: `${row.width}%` }}
-                                            key={`${index}${idx}`}
-                                        >
-                                            <span className={css.numberData}>
-                                                {convertToKlayByFixed(item[TableTitle.reward])}
-                                            </span>
-                                        </div>
-                                    );
-                                case TableTitle.size:
-                                    return (
-                                        <div
-                                            className={cx(css.Table__td, css.Table__td__right)}
-                                            style={{ width: `${row.width}%` }}
-                                            key={`${index}${idx}`}
-                                        >
-                                            <span className={css.TimeDelta}>
-                                                {numberWithCommas(item[TableTitle.size])}
-                                            </span>
-                                        </div>
-                                    );
-                                default:
-                                    return;
-                            }
-                        })}
-                    </div>
-                );
+                                        );
+                                    case TableTitle.age:
+                                        return (
+                                            <div
+                                                className={css.Table__td}
+                                                style={{ width: `${row.width}%` }}
+                                                key={`${index}${idx}`}
+                                            >
+                                                <AgeComponent timestamp={item[TableTitle.age]} />
+                                            </div>
+                                        );
+                                    case TableTitle.totalTx:
+                                        return (
+                                            <div
+                                                className={css.Table__td}
+                                                style={{ width: `${row.width}%` }}
+                                                key={`${index}${idx}`}
+                                            >
+                                                <span className={css.numberData}>{item[TableTitle.totalTx]}</span>
+                                            </div>
+                                        );
+
+                                    case TableTitle.proposer:
+                                        return (
+                                            <div
+                                                className={css.Table__td}
+                                                style={{ width: `${row.width}%` }}
+                                                key={`${index}${idx}`}
+                                            >
+                                                <div
+                                                    className={cx(
+                                                        css.CroppedTxWithLink,
+                                                        css.CroppedTxWithLink__address,
+                                                    )}
+                                                >
+                                                    <Link href={`/contract/${item[TableTitle.proposer]}`}>
+                                                        {item.proposerName}
+                                                    </Link>
+                                                </div>
+                                            </div>
+                                        );
+                                    case TableTitle.reward:
+                                        return (
+                                            <div
+                                                className={cx(css.Table__td, css.Table__td__right)}
+                                                style={{ width: `${row.width}%` }}
+                                                key={`${index}${idx}`}
+                                            >
+                                                <span className={css.numberData}>
+                                                    {convertToKlayByFixed(item[TableTitle.reward])}
+                                                </span>
+                                            </div>
+                                        );
+                                    case TableTitle.size:
+                                        return (
+                                            <div
+                                                className={cx(css.Table__td, css.Table__td__right)}
+                                                style={{ width: `${row.width}%` }}
+                                                key={`${index}${idx}`}
+                                            >
+                                                <span className={css.TimeDelta}>
+                                                    {numberWithCommas(item[TableTitle.size])}
+                                                </span>
+                                            </div>
+                                        );
+
+                                    default:
+                                        return;
+                                }
+                            })}
+                        </div>
+                    );
+                } else if (instanceOfTxs(item)) {
+                    return (
+                        <div className={css.Table__tr} key={item.txHash}>
+                            {table.map((row, idx) => {
+                                switch (row.th) {
+                                    case TableTitle.block:
+                                        return (
+                                            <div
+                                                className={css.Table__td}
+                                                style={{ width: `${row.width}%` }}
+                                                key={`${index}${idx}`}
+                                            >
+                                                <div className={css.CroppedTxWithLink}>
+                                                    <a href={`/tx/${item.txHash}`}>{item.txHash}</a>
+                                                </div>
+                                            </div>
+                                        );
+
+                                    default:
+                                        return;
+                                }
+                            })}
+                        </div>
+                    );
+                }
             })}
         </div>
     );
 };
 
-const Paginator = ({ data }: { data: ReturnBlocks }) => {
+const Paginator = ({ data }: { data: ReturnBlocks | ReturnTXS }) => {
     const endPage = data.total > data.limit ? Math.floor(data.total / data.limit) + 1 : 1;
     const router = useRouter();
 

@@ -8,7 +8,7 @@ import {
     SERVER_PACKET_LAYER,
     ServerMessageType,
 } from 'socket/index.declare';
-import { webSocketHost } from 'utils/variables';
+import { HOST_WS_SERVER } from 'utils/variables';
 
 class ClientWebSocketStorage {
     protected clientValues: ClientInitValues = clientInitValues;
@@ -134,6 +134,6 @@ class WebSocketClientModel extends ServerWebsocketStorage {
     };
 }
 
-export default typeof window !== 'undefined' ? new WebSocketClientModel(new WebSocket(webSocketHost)) : null;
+export default typeof window !== 'undefined' ? new WebSocketClientModel(new WebSocket(HOST_WS_SERVER)) : null;
 
 // export default WebSocketClientModel;

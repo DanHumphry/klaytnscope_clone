@@ -25,7 +25,7 @@ const Header = ({ selectedPath }: HeaderProps) => {
         wsc.sendMessage(ClientMessageType.enterRooms);
 
         return () => {
-            wsc.sendMessage(ClientMessageType.leaveRooms);
+            wsc?.sendMessage(ClientMessageType.leaveRooms);
             localStorage.setItem('network', networks.selected);
         };
     }, [networks]);
