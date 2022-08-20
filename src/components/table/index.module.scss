@@ -80,6 +80,29 @@
                                     display: inline-block;
                                 }
                             }
+
+                            .__fromToTh {
+                                .__from {
+                                    width: 11rem;
+                                    text-align: center;
+                                    display: inline-block;
+                                }
+
+                                .__arrow {
+                                    display: inline-block;
+                                    width: 2.6rem;
+                                    height: 0.8rem;
+                                    vertical-align: middle;
+                                    background: 50% / contain no-repeat
+                                        url('https://baobab.scope.klaytn.com/icons/icon-arrow-black.svg');
+                                }
+
+                                .__to {
+                                    width: 11rem;
+                                    text-align: center;
+                                    display: inline-block;
+                                }
+                            }
                         }
                     }
 
@@ -107,7 +130,6 @@
 
                                     a {
                                         text-decoration: none;
-                                        transition: all 0.1s ease-in-out;
                                         position: relative;
                                         display: inline-block;
                                         height: 24px;
@@ -120,9 +142,16 @@
                                         padding: 0 3px 0 8px;
                                         font-size: 1.3rem;
                                         font-weight: 400;
-                                        width: 130px;
+                                        width: 10rem;
                                         color: #222;
                                         background-color: hsla(0, 0%, 100%, 0.1);
+                                        background-color: #f0f2fc;
+                                        transition: all 0.1s ease-in-out;
+
+                                        &:hover {
+                                            color: #fff;
+                                            background-color: #313557;
+                                        }
                                     }
                                 }
 
@@ -141,9 +170,26 @@
                                     vertical-align: top;
                                 }
 
+                                .blockNumber {
+                                    cursor: pointer;
+                                }
+
                                 .numberData {
                                     color: #222;
                                     font-weight: bold;
+                                }
+
+                                .txType {
+                                    color: #888;
+                                    width: 100%;
+                                    overflow: hidden;
+                                    text-overflow: ellipsis;
+                                    white-space: nowrap;
+                                    display: inline-block;
+                                }
+
+                                .rewardData {
+                                    color: #888;
                                 }
                             }
 
@@ -165,6 +211,11 @@
                     .FromTo__arrow.white__arrow {
                         background: 50% / contain no-repeat
                             url('https://baobab.scope.klaytn.com/icons/icon-arrow-white.svg');
+                    }
+
+                    .FromTo__arrow.black__arrow {
+                        background: 50% / contain no-repeat
+                            url('https://baobab.scope.klaytn.com/icons/icon-arrow-black.svg');
                     }
                 }
 

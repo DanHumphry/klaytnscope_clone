@@ -212,17 +212,19 @@ class BlockFinder {
             const txs = [];
 
             for (const tx of transactions) {
-                const { transactionHash, status, from, type, to, value } = tx;
+                const { transactionHash, status, from, type, to, value, gasUsed } = tx;
                 const val = {
+                    [TableTitle.block]: blockNumber,
                     txHash: transactionHash,
-                    timestamp: +timestamp,
+                    [TableTitle.age]: +timestamp,
                     from: from,
                     to: to || '',
                     status: +status,
                     txCategory: type,
                     fromName: '',
                     toName: '',
-                    value: value,
+                    value: value || '0',
+                    gasUsed: gasUsed,
                 };
 
                 txs.push(val);

@@ -1,8 +1,9 @@
 import cx from 'classnames';
 import css from 'components/root/index.module.scss';
 import useServerStorage from 'hooks/socket/useServerStorage';
+import Link from 'next/link';
 import React from 'react';
-import { ServerMessageType } from 'socket/index.declare';
+import { ServerMessageType, TableTitle } from 'socket/index.declare';
 import { convertToAge } from 'utils/commonJS';
 
 const RecentTransactions = () => {
@@ -39,26 +40,23 @@ const RecentTransactions = () => {
                                             <div className={css.Table__tr} key={item.txHash}>
                                                 <div className={cx(css.Table__td, css.MainList__table__txHash)}>
                                                     <div className={css.CroppedTxWithLink}>
-                                                        <a href="/tx/0x274b61716313d24f20ef1d5f3fd32cec03bcd90207fa9cdbe9544b0377aac8ef">
-                                                            {item.txHash}
-                                                        </a>
+                                                        <Link href={`/tx/${item.txHash}`}>
+                                                            <a>{item.txHash}</a>
+                                                        </Link>
                                                     </div>
                                                 </div>
                                                 <div className={cx(css.Table__td, css.MainList__table__timestamp_th)}>
                                                     <span className={css.TimeDelta}>
-                                                        {convertToAge(item.timestamp)}
+                                                        {convertToAge(item[TableTitle.age])}
                                                     </span>
                                                 </div>
                                                 <div className={cx(css.Table__td, css.MainList__table__fromTo)}>
                                                     <div className={css.FromTo}>
                                                         <span className="FromTo__from">
                                                             <div className={css.CroppedTxWithLink}>
-                                                                <a
-                                                                    className="CroppedTxWithLink__link CroppedTxWithLink__link--success"
-                                                                    href="/account/0x393c0c47b9a6b3f226456a7162086579decc8ae3"
-                                                                >
-                                                                    {item.from}
-                                                                </a>
+                                                                <Link href={`/account/${item.from}`}>
+                                                                    <a>{item.from}</a>
+                                                                </Link>
                                                             </div>
                                                         </span>
                                                         <span
@@ -66,12 +64,9 @@ const RecentTransactions = () => {
                                                         ></span>
                                                         <span className="FromTo__to">
                                                             <div className={css.CroppedTxWithLink}>
-                                                                <a
-                                                                    className="CroppedTxWithLink__link CroppedTxWithLink__link--success"
-                                                                    href="/account/0x9e0112a06d12fab3302d72bae44f19f300095907"
-                                                                >
-                                                                    {item.to}
-                                                                </a>
+                                                                <Link href={`/account/${item.to}`}>
+                                                                    <a>{item.to}</a>
+                                                                </Link>
                                                             </div>
                                                         </span>
                                                     </div>

@@ -38,7 +38,11 @@ const RecentBlocks = () => {
                                         return (
                                             <div className={css.Table__tr} key={item[TableTitle.block]}>
                                                 <div className={cx(css.Table__td, css.MainList__table__number)}>
-                                                    <span className={css.numberData}>{item[TableTitle.block]}</span>
+                                                    <Link href={`/block/${item[TableTitle.block]}`}>
+                                                        <span className={cx(css.numberData, css.blockNumber)}>
+                                                            {item[TableTitle.block]}
+                                                        </span>
+                                                    </Link>
                                                 </div>
                                                 <div className={cx(css.Table__td, css.MainList__table__timestamp)}>
                                                     <span className={css.TimeDelta}>

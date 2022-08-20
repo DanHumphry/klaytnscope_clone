@@ -33,9 +33,12 @@ export const setPromiseAll = async (array: any[], callback: (value: any, index: 
 };
 
 export const convertToKlayByFixed = (peb: string, fixed: number = 6): string => {
+    if (peb === '0') return `0.000000`;
+
     const int = peb.slice(0, -18);
+
     const float = peb.slice(int.length, -(18 - fixed));
-    return `${int}.${float}`;
+    return `${int || '0'}.${float.padStart(6, '0')}`;
 };
 
 export const convertToAge = (timeStamp: number): string => {

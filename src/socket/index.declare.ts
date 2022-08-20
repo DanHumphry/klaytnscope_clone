@@ -77,8 +77,9 @@ export interface Block {
 }
 
 export interface Txs {
+    [TableTitle.block]: number;
+    [TableTitle.age]: number;
     txHash: string;
-    timestamp: number;
     from: string;
     to: string;
     status: number;
@@ -86,6 +87,7 @@ export interface Txs {
     fromName: string;
     toName: string;
     value: string;
+    gasUsed: string;
 }
 
 export const instanceOfBlock = (object: any): object is Block => {
@@ -93,7 +95,7 @@ export const instanceOfBlock = (object: any): object is Block => {
 };
 
 export const instanceOfTxs = (object: any): object is Txs => {
-    return TableTitle.txHash in object;
+    return 'txHash' in object;
 };
 
 export interface CLIENT_PACKET_LAYER {
