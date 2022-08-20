@@ -161,7 +161,7 @@ class BlockFinder {
     private readonly network: Networks;
     private readonly wss: WebSocketServer;
 
-    protected readonly caver: Caver;
+    private readonly caver: Caver;
 
     public health:{status : number} = {status : 3};
 
@@ -185,6 +185,8 @@ class BlockFinder {
     public getBlocks = (): Block[] => this.blockArray;
     public getTxs = (): TransactionForRPC[] | any => this.txsArray;
     public getBlockHeader = (): Block | undefined => this.blockArray[this.blockArray.length - 1];
+
+    public getCaver = ():Caver => this.caver; 
 
     private initialize = async (wsProvider: string) => {
         const web3 = new Web3(wsProvider);
@@ -225,14 +227,14 @@ class BlockFinder {
 
         try {
             const receipts = await this.caver.klay.getBlockWithConsensusInfo(blockNumber);
-            const { number, timestamp, transactions, originProposer, gasUsed, size } = receipts as any;
+            const { number, timestamp, transactions, originProposer, gasUsed, size, hash, parentHash } = receipts as any;
 
             const txs = [];
 
             for (const tx of transactions) {
                 const { transactionHash, status, from, type, to, value, gasUsed } = tx;
                 const val = {
-                    [TableTitle.block]: blockNumber,
+                    [TableTitle.block]: +blockNumber,
                     txHash: transactionHash,
                     [TableTitle.age]: +timestamp,
                     from: from,
@@ -261,6 +263,8 @@ class BlockFinder {
                 gasUsed: gasUsed,
                 proposerName: proposerIdx === -1 ? '' : committee[1][proposerIdx],
                 txs: txs,
+                hash : hash,
+                parentHash : parentHash
             };
 
             this.blockArray.push(block);

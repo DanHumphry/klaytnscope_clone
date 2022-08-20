@@ -1,12 +1,42 @@
+import axios from 'axios';
 import cx from 'classnames';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
+import { ClientMessageType, Block, Txs, TableTitle } from 'socket/index.declare';
+import { HOST_SERVER } from 'utils/variables';
+import {convertToAge, convertToKlayByFixed, numberWithCommas} from 'utils/commonJS';
+import useClientStorage from 'hooks/socket/useClientStorage';
 import css from './index.module.scss';
 
 const Block = () => {
+    const [network] = useClientStorage(ClientMessageType.network);
+
     const { blockNumber } = useRouter().query;
+
+    const [_block, _setBlock] = useState<Block>({
+        [TableTitle.block]: 0,
+        [TableTitle.age]: 0,
+        [TableTitle.totalTx]: 0,
+        [TableTitle.proposer]: '',
+        [TableTitle.reward]: '',
+        [TableTitle.size]: 0,
+        gasUsed: '',
+        proposerName: '',
+        txs: [],
+        hash : '',
+        parentHash : ''
+    });
+
+    useEffect(() => {
+        if (typeof blockNumber === 'string') {
+            axios
+            .get(`${HOST_SERVER}/block/${blockNumber}?network=${network.selected}`)
+            .then((res) => _setBlock(res.data.result))
+            .catch(console.error);
+        }
+    }, [blockNumber])
 
     return (
         <div className={css.BlockDetailPage}>
@@ -17,7 +47,7 @@ const Block = () => {
                     </a>
                 </Link>
                 <h2 className={css.title}>Block</h2>
-                <span className={css.blockHeight}>#99019508</span>
+                <span className={css.blockHeight}>#{_block[TableTitle.block]}</span>
                 <Link href={`/block/${blockNumber && +blockNumber + 1}`}>
                     <a className={css.moveBlockBtn}>
                         <img src="https://scope.klaytn.com/icons/icon-direction-page.svg" />
@@ -45,7 +75,8 @@ const Block = () => {
                         <div className={css.row}>
                             <div className={css.row__label}>Time</div>
                             <div className={css.row__value}>
-                                42 seconds ago
+                                {convertToAge(_block.AGE)}
+                                {/*{아래 time 수정 필요}*/}
                                 <span className={css.__time}>(Aug 19, 2022 23:13:44 / Local)</span>
                             </div>
                         </div>
@@ -53,7 +84,7 @@ const Block = () => {
                             <div className={css.row__label}>Hash</div>
                             <div className={css.row__value}>
                                 <span className={css.__hash}>
-                                    0xb3a8b30e50644b27bdb77a6022907d2298c7bf92043d5c0416953cccf4a88987
+                                    {_block.hash}
                                 </span>
 
                                 <button className="Button withCopyButtonTitle withCopyButton__button" type="button">
@@ -67,7 +98,7 @@ const Block = () => {
                                 <Link href={`block/${blockNumber && +blockNumber + 1}`}>
                                     <a>
                                         <span className={cx(css.__hash, css.__parentHash)}>
-                                            0xb3a8b30e50644b27bdb77a6022907d2298c7bf92043d5c0416953cccf4a88987
+                                            {_block.parentHash}
                                         </span>
                                     </a>
                                 </Link>
@@ -79,7 +110,7 @@ const Block = () => {
                         </div>
                         <div className={css.row}>
                             <div className={css.row__label}>Total TXs</div>
-                            <div className={css.row__value}>2 TXs</div>
+                            <div className={css.row__value}>{_block.txs.length} TXs</div>
                         </div>
                         <div className={css.row}>
                             <div className={css.row__label}>Block Reward</div>
@@ -88,14 +119,14 @@ const Block = () => {
                                     <div className="Tooltip">
                                         <div className={css.__valueUnit}>
                                             <span className={css.__value}>
-                                                <span>9.661064</span>
+                                                <span>{convertToKlayByFixed(_block[TableTitle.reward])}</span>
                                             </span>
                                             <span className={css.__uint}>KLAY</span>
                                             <a></a>
                                         </div>
                                         <div className={css.__rewardDetail}>
                                             (Minted<span className="BlockReward__reward"> 9.6</span> + TX Fee{' '}
-                                            <span className="BlockReward__txFee">0.061064</span>)
+                                            <span className="BlockReward__txFee">{convertToKlayByFixed(+_block.gasUsed * 250000000000 + '')}</span>)
                                         </div>
                                         {/*{아래 툴팁 나중에 일괄 처리 예정}*/}
                                         {/*<div className="Tooltip__tooltip Tooltip__tooltip--bottom">*/}
@@ -118,7 +149,7 @@ const Block = () => {
                         </div>
                         <div className={css.row}>
                             <div className={css.row__label}>Block Size</div>
-                            <div className={css.row__value}>3,127 bytes</div>
+                            <div className={css.row__value}>{numberWithCommas(_block[TableTitle.size])} bytes</div>
                         </div>
                     </div>
                 </div>

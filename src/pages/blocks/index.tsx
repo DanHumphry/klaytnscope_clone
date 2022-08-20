@@ -34,7 +34,7 @@ const Blocks: NextPage = () => {
             .get(`${HOST_SERVER}/block?network=${network.selected}${query}`)
             .then((res) => setData(res.data))
             .catch(console.error);
-    }, [router.query]);
+    }, [router.query, network]);
 
     return (
         <BlockTable

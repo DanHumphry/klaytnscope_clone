@@ -1,7 +1,9 @@
+import Caver from 'caver-js';
 import express from 'express';
 import { Query } from 'express-serve-static-core';
 
-import { Networks } from '../../socket/index.declare';
+import { Networks, TableTitle, Block, Txs } from '../../socket/index.declare';
+import {committee} from '../../utils/variables';
 import { wss } from '../app';
 
 const router = express();
@@ -56,5 +58,62 @@ router.get('/txs', (req: TypedRequestQuery<{ limit: string; page: string; networ
         });
     }
 });
+
+router.get('/:blockNumber', async (req, res, next) => {
+    const { blockNumber } = req.params;
+    const {network} = req.query as any;
+
+    if (!blockNumber || !network) return res.status(400).json({message : 'invalid qurey & params'});
+
+    try {
+        const caver = wss.getBlockFinder(network).getCaver();
+
+        const receipts = await caver.klay.getBlockWithConsensusInfo(blockNumber);
+    
+        const { number, timestamp, transactions, originProposer, gasUsed, size, hash, parentHash } = receipts as any;
+    
+        const txs: Txs[] = [];
+    
+        for (const tx of transactions) {
+            const { transactionHash, status, from, type, to, value, gasUsed } = tx;
+            const val: Txs = {
+                [TableTitle.block]: +blockNumber,
+                txHash: transactionHash,
+                [TableTitle.age]: +timestamp,
+                from: from,
+                to: to || '',
+                status: +status,
+                txCategory: type,
+                fromName: '',
+                toName: '',
+                value: value || '0',
+                gasUsed: gasUsed,
+            };
+    
+            txs.push(val);
+        }
+    
+        const proposerIdx = committee[0].indexOf(originProposer);
+    
+        const block: Block = {
+            [TableTitle.block]: +number,
+            [TableTitle.age]: +timestamp,
+            [TableTitle.totalTx]: transactions.length,
+            [TableTitle.proposer]: originProposer,
+            [TableTitle.reward]: 9.6 * 10 ** 18 + 250000000000 * gasUsed + '',
+            [TableTitle.size]: +size,
+            gasUsed: gasUsed,
+            proposerName: proposerIdx === -1 ? '' : committee[1][proposerIdx],
+            txs: txs,
+            hash: hash,
+            parentHash: parentHash
+        };
+    
+        res.status(200).json({result : block});
+    } catch {
+        res.status(500).json({message : 'internal error'})
+    }
+});
+
 
 export default router;

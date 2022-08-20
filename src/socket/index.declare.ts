@@ -78,6 +78,8 @@ export interface Block {
     gasUsed: string;
     proposerName: string;
     txs: Txs[];
+    hash: string;
+    parentHash : string;
 }
 
 export interface Txs {
