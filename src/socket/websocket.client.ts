@@ -26,6 +26,7 @@ class ClientWebSocketStorage {
 
 class ServerWebsocketStorage extends ClientWebSocketStorage {
     protected ws: WebSocket;
+
     protected receivedServerValues: ReceivedServerInitValues = receivedServerInitValues;
     protected eventEmitterDependency: Record<string, string> = {};
 
@@ -124,6 +125,10 @@ class WebSocketClientModel extends ServerWebsocketStorage {
                     this.receivedServerValues[ServerMessageType.initBlocks].txs = [...prevTxs, ..._data.data.txs];
                 }
                 this.eventEmitter(ServerMessageType.initBlocks, msg.data);
+                break;
+
+            case ServerMessageType.health:
+                this.receivedServerValues[ServerMessageType.health] = _data.data;
                 break;
 
             default:
