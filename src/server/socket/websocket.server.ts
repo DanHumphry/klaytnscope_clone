@@ -126,6 +126,9 @@ class WebSocketServerModel {
                         case ClientMessageType.network:
                             this.setNetwork(ws, _data);
                             break;
+                        case ClientMessageType.health:
+                            this.sendMessage(ws, ServerMessageType.health, this.rooms[_data.network].blockFinder.health, _data.network);
+                            break;
 
                         default:
                             break;
@@ -160,6 +163,8 @@ class BlockFinder {
 
     protected readonly caver: Caver;
 
+    public health:{status : number} = {status : 3};
+
     private blockArray: Block[] = [];
     private txsArray: TransactionForRPC[] | any = [];
 
@@ -181,13 +186,26 @@ class BlockFinder {
     public getTxs = (): TransactionForRPC[] | any => this.txsArray;
     public getBlockHeader = (): Block | undefined => this.blockArray[this.blockArray.length - 1];
 
-    private initialize = (wsProvider: string) => {
+    private initialize = async (wsProvider: string) => {
         const web3 = new Web3(wsProvider);
 
-        setInterval(() => {
-            web3.eth.getBlockNumber().catch(console.error);
-        }, 10000);
+        const compareBlockNumber = async () => {
+            if (this.blockArray.length === 0) {
+                setTimeout(compareBlockNumber, 1000);
+                return;
+            }
 
+            const currentBlockNumber = await web3.eth.getBlockNumber();
+            const thisBlockHeader = this.blockArray[this.blockArray.length - 1][TableTitle.block];
+
+            const dif = Math.abs(currentBlockNumber - thisBlockHeader);
+            
+            this.health.status = dif > 60 ? 3 : dif > 10 ? 2 : 1;
+        }
+
+        setInterval(compareBlockNumber, 10000);
+
+        await compareBlockNumber();
         web3.eth.subscribe('newBlockHeaders').on('data', this.blockListener).on('error', console.error);
     };
 
@@ -257,6 +275,8 @@ class BlockFinder {
         }
     };
 }
+
+
 
 export interface Network {
     blockFinder: BlockFinder;

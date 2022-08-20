@@ -12,7 +12,9 @@ const useServerStorage = <T extends keyof ReceivedServerInitValues>(type: T): Re
         if (!wsc) return;
 
         wsc.eventListener(type, () => {
-            if (wsc) setState({ ...wsc.getServerValue(type) });
+            if (wsc) {
+                setState({...wsc.getServerValue(type)});
+            }
         });
 
         return () => {

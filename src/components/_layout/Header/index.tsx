@@ -4,8 +4,9 @@ import React, { useEffect } from 'react';
 import css from 'components/_layout/Header/index.module.scss';
 import useClientStorage from 'hooks/socket/useClientStorage';
 import useTap from 'hooks/useTap';
-import { ClientMessageType, Networks } from 'socket/index.declare';
+import { ClientMessageType, Networks, ServerMessageType } from 'socket/index.declare';
 import wsc from 'socket/websocket.client';
+import useServerStorage from 'hooks/socket/useServerStorage';
 
 type HeaderProps = {
     selectedPath: string;
@@ -14,6 +15,9 @@ type HeaderProps = {
 const Header = ({ selectedPath }: HeaderProps) => {
     const [networkTap, setNetworkTap] = useTap(false);
     const [networks, setNetworks] = useClientStorage(ClientMessageType.network);
+
+    const health = useServerStorage(ServerMessageType.health);
+    console.log(health);
 
     const _setNetworksHandler = (next: Networks) => {
         setNetworks({ ...networks, selected: next });
@@ -29,6 +33,12 @@ const Header = ({ selectedPath }: HeaderProps) => {
             localStorage.setItem('network', networks.selected);
         };
     }, [networks]);
+
+    useEffect(() => {
+        if (!wsc) return;
+        
+        wsc.sendMessage(ClientMessageType.health);
+    }, [networks])
 
     return (
         <header className={css.Layout_header} style={selectedPath !== '/' ? { margin: '0 auto 7rem' } : undefined}>
@@ -48,6 +58,9 @@ const Header = ({ selectedPath }: HeaderProps) => {
                 </button>
             </div>
 
+            <div>
+                {health.status === 1 ? '건강' : health.status === 2 ? '지연' : '나쁨'}
+            </div>
             <div
                 className={cx(css.Header__dropdownMenu, selectedPath !== '/' && css.Header__not__home)}
                 onClick={() => setNetworkTap(!networkTap)}
