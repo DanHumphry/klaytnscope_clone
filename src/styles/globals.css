@@ -75,6 +75,9 @@ ul {
 }
 
 .withCopyButtonTitle {
+    width: 7rem;
+    height: 3.6rem;
+
     cursor: pointer;
     display: inline-block;
     vertical-align: top;

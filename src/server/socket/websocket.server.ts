@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import Web3 from 'web3';
 import { BlockHeader } from 'web3-eth';
 import { WebSocketServer } from 'ws';
+
 import {
     Block,
     CLIENT_PACKET_LAYER,
@@ -14,7 +15,6 @@ import {
     TableTitle,
     WebSocket_uuid,
 } from '../../socket/index.declare';
-
 import { Queue } from '../../utils/commonJS';
 import { committee } from '../../utils/variables';
 
@@ -127,7 +127,12 @@ class WebSocketServerModel {
                             this.setNetwork(ws, _data);
                             break;
                         case ClientMessageType.health:
-                            this.sendMessage(ws, ServerMessageType.health, this.rooms[_data.network].blockFinder.health, _data.network);
+                            this.sendMessage(
+                                ws,
+                                ServerMessageType.health,
+                                this.rooms[_data.network].blockFinder.health,
+                                _data.network,
+                            );
                             break;
 
                         default:
@@ -163,7 +168,7 @@ class BlockFinder {
 
     private readonly caver: Caver;
 
-    public health:{status : number} = {status : 3};
+    public health: { status: number } = { status: 3 };
 
     private blockArray: Block[] = [];
     private txsArray: TransactionForRPC[] | any = [];
@@ -186,7 +191,7 @@ class BlockFinder {
     public getTxs = (): TransactionForRPC[] | any => this.txsArray;
     public getBlockHeader = (): Block | undefined => this.blockArray[this.blockArray.length - 1];
 
-    public getCaver = ():Caver => this.caver; 
+    public getCaver = (): Caver => this.caver;
 
     private initialize = async (wsProvider: string) => {
         const web3 = new Web3(wsProvider);
@@ -201,9 +206,9 @@ class BlockFinder {
             const thisBlockHeader = this.blockArray[this.blockArray.length - 1][TableTitle.block];
 
             const dif = Math.abs(currentBlockNumber - thisBlockHeader);
-            
+
             this.health.status = dif > 60 ? 3 : dif > 10 ? 2 : 1;
-        }
+        };
 
         setInterval(compareBlockNumber, 10000);
 
@@ -227,12 +232,13 @@ class BlockFinder {
 
         try {
             const receipts = await this.caver.klay.getBlockWithConsensusInfo(blockNumber);
-            const { number, timestamp, transactions, originProposer, gasUsed, size, hash, parentHash } = receipts as any;
+            const { number, timestamp, transactions, originProposer, gasUsed, size, hash, parentHash } =
+                receipts as any;
 
             const txs = [];
 
             for (const tx of transactions) {
-                const { transactionHash, status, from, type, to, value, gasUsed } = tx;
+                const { transactionHash, status, from, type, to, value, gasUsed, input } = tx;
                 const val = {
                     [TableTitle.block]: +blockNumber,
                     txHash: transactionHash,
@@ -245,6 +251,7 @@ class BlockFinder {
                     toName: '',
                     value: value || '0',
                     gasUsed: gasUsed,
+                    method: input.slice(0, 10),
                 };
 
                 txs.push(val);
@@ -263,8 +270,8 @@ class BlockFinder {
                 gasUsed: gasUsed,
                 proposerName: proposerIdx === -1 ? '' : committee[1][proposerIdx],
                 txs: txs,
-                hash : hash,
-                parentHash : parentHash
+                hash: hash,
+                parentHash: parentHash,
             };
 
             this.blockArray.push(block);
@@ -281,8 +288,6 @@ class BlockFinder {
         }
     };
 }
-
-
 
 export interface Network {
     blockFinder: BlockFinder;

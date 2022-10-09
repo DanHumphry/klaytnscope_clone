@@ -17,7 +17,7 @@ export interface ReturnTXS {
 
 const Txs: NextPage = () => {
     const router = useRouter();
-    
+
     const [network] = useClientStorage(ClientMessageType.network);
 
     const [data, setData] = useState<ReturnTXS>({ limit: 0, page: 0, result: [], total: 0 });

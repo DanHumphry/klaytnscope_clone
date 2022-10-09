@@ -1,0 +1,320 @@
+.TxDetailPage {
+    max-width: 1480px;
+    margin: 0 auto;
+
+    .TxDetailPage__header {
+        margin-bottom: 1.5rem;
+
+        .TxDetailPage__title {
+            font-size: 2.8rem;
+            font-weight: 700;
+        }
+
+        .TxDetailPage__txHash {
+            margin-top: 1.5rem;
+            display: block;
+
+            .TxHashWithCopyButton {
+                display: inline-block;
+                padding: 1rem;
+                vertical-align: middle;
+                background-color: rgb(78, 82, 125);
+                border-radius: 2px;
+                color: rgb(255, 255, 255);
+                background-image: linear-gradient(266deg, rgb(67, 89, 130), rgb(58, 64, 117));
+                font-size: 1.4rem;
+                font-weight: 400;
+            }
+
+            button {
+                width: 7rem;
+                height: 3.6rem;
+                margin-left: 6px;
+                border-color: rgb(78, 82, 125);
+                color: #313557;
+                position: relative;
+                font-size: 1.2rem;
+                font-weight: 700;
+                background: right 1rem center/1.2rem 1.2rem no-repeat
+                    url('https://baobab.scope.klaytn.com/icons/icon-clipboard-blue.svg');
+                transition: border-color 0.1s ease-in-out, background-color 0.1s ease-in-out,
+                    background-image 0.1s ease-in-out, color 0.1s ease-in-out;
+                display: inline-block;
+                vertical-align: top;
+                &:hover {
+                    color: rgb(255, 255, 255);
+                    background: right 1rem center/1.2rem 1.2rem no-repeat
+                        url('https://baobab.scope.klaytn.com/icons/icon-clipboard-white.svg');
+                    background-color: rgb(78, 82, 125);
+                }
+            }
+        }
+    }
+
+    .TxDetailPage__content {
+        .BlockDetailOverview {
+            width: calc(70% - 10px);
+            margin-right: 10px;
+        }
+
+        .DetailInfoTemplate {
+            margin-bottom: 1rem;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px 0 rgb(0 0 0 / 4%);
+            display: inline-block;
+            vertical-align: top;
+
+            .templateHeader {
+                padding: 0 4rem;
+                line-height: 6.5rem;
+                border-bottom: 1px solid #f2f2f2;
+                font-size: 1.5rem;
+                font-weight: 700;
+
+                .templateHeader__tooltip {
+                    float: right;
+
+                    span {
+                        content: '';
+                        position: relative;
+                        width: 26px;
+                        height: 26px;
+                        float: right;
+                        vertical-align: middle;
+                        margin-top: 19px;
+                        border-radius: 50%;
+                        border: 1px solid #e1e1e7;
+                        background: 50%/2px no-repeat url('https://scope.klaytn.com/icons/detail-information-off.svg');
+                    }
+
+                    .tooltip__bottom {
+                        width: 167px;
+                        height: 86px;
+                        margin-top: -20px;
+                        font-size: 1.2rem;
+                        font-weight: 400;
+                        line-height: 1.5;
+                        left: 50%;
+                        bottom: -11px;
+                        transform: translate(-50%, 100%);
+
+                        &:after {
+                            top: -11px;
+                            bottom: unset;
+                            transform: translate(-50%, 100%);
+                            border: 6px solid transparent;
+                            border-top: none;
+                            border-bottom: 6px solid rgba(21, 21, 21, 0.9);
+                            left: 50%;
+                        }
+                    }
+                }
+            }
+
+            .templateContent {
+                height: 29.3rem;
+                position: relative;
+                padding: 3rem 4rem;
+
+                .row {
+                    display: block;
+                    margin-bottom: 1rem;
+                    line-height: 30px;
+                    font-size: 1.3rem;
+                    font-weight: 400;
+
+                    .row__label {
+                        display: inline-block;
+                        vertical-align: middle;
+                        width: 140px;
+                        color: #9699b2;
+                        font-size: 1.3rem;
+                        font-weight: 700;
+                        line-height: 1.4;
+                    }
+
+                    .row__value {
+                        display: inline-block;
+                        vertical-align: middle;
+                        width: calc(100% - 140px);
+
+                        a {
+                            word-break: break-all;
+                        }
+
+                        .__time {
+                            margin-left: 0.8rem;
+                            color: #9699b2;
+                        }
+
+                        .__hash {
+                            max-width: calc(100% - 85px);
+                            display: inline-block;
+                            vertical-align: top;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                            white-space: nowrap;
+                        }
+
+                        .__parentHash {
+                            font-weight: 700;
+                        }
+
+                        .__BlockReward {
+                            .__valueUnit {
+                                display: inline-block;
+
+                                .__value {
+                                    width: auto;
+                                    max-width: calc(100% - 72px);
+                                    color: #222;
+                                    vertical-align: middle;
+                                    font-size: 1.3rem;
+                                    font-weight: 400;
+                                }
+
+                                .__uint {
+                                    width: 62px;
+                                    margin-left: 10px;
+                                    color: #888;
+                                    vertical-align: middle;
+                                    font-size: 1.3rem;
+                                    font-weight: 400;
+                                }
+                            }
+
+                            .__rewardDetail {
+                                color: #9699b2;
+                                margin-left: 0.8rem;
+                                vertical-align: middle;
+                                display: inline-block;
+
+                                span {
+                                    &:nth-child(1) {
+                                        margin-right: 0.3rem;
+                                    }
+
+                                    &:nth-child(1) {
+                                        margin-left: 0.3rem;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        .BlockCommitteeInfo {
+            vertical-align: top;
+            display: inline-block;
+            width: 30%;
+            height: 35.8rem;
+            margin-bottom: 1rem;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px 0 rgb(0 0 0 / 4%);
+
+            .__header {
+                padding: 0 4rem;
+                line-height: 6.5rem;
+                border-bottom: 1px solid #f2f2f2;
+                font-size: 1.5rem;
+                font-weight: 700;
+            }
+
+            .__proposer {
+                width: 100%;
+                padding: 30px 40px 0;
+                height: 55px;
+                margin-bottom: 70px;
+                display: flex;
+                align-items: center;
+
+                .__label {
+                    display: inline-block;
+                    color: #9699b2;
+                    font-size: 1.3rem;
+                    font-weight: 700;
+                    width: 45%;
+                }
+                .__value {
+                    display: inline-block;
+                    width: 55%;
+
+                    .CroppedTxWithLink {
+                        width: 100%;
+                        position: relative;
+                        display: inline-block;
+
+                        .isLabel {
+                            width: 100%;
+                            padding: 0 5px;
+                            text-overflow: ellipsis;
+                            overflow: inherit;
+                            background-image: linear-gradient(254deg, #435982, #3a4075);
+
+                            .addressTooltip {
+                                width: 100%;
+
+                                .CroppedTxWithLink__text {
+                                    white-space: nowrap;
+                                    text-overflow: ellipsis;
+                                    overflow: hidden;
+                                    height: 100%;
+                                    width: 100%;
+                                    word-break: break-all;
+                                    font-size: 1.3rem;
+                                    font-weight: 400;
+                                    line-height: 24px;
+                                    color: #ffffff;
+                                    text-align-last: center;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        .DetailPageTableTemplate {
+            position: relative;
+            width: 100%;
+            padding: 0 4rem 2.5rem;
+            border-radius: 5px;
+            background-color: #fff;
+            box-shadow: 0 4px 6px 0 rgb(0 0 0 / 4%);
+
+            .TapTemplate {
+                .Tap__header {
+                    padding: 0 4rem;
+                    margin: 0 -4rem 1.5rem;
+                    border-bottom: 1px solid #f4f4f4;
+                    line-height: 6.5rem;
+                    font-size: 1.5rem;
+                    font-weight: 700;
+
+                    .tap__item {
+                        position: relative;
+                        color: #9699b2;
+                        margin-right: 3.6rem;
+                        outline: none;
+                        display: inline-block;
+                        vertical-align: top;
+                        cursor: pointer;
+                    }
+
+                    .tap__active {
+                        position: relative;
+                        border-bottom: 2px solid #363a5d;
+                        color: #363a5d;
+                    }
+                }
+
+                .Tap__contents {
+                }
+            }
+        }
+    }
+}

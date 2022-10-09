@@ -9,14 +9,14 @@ export enum ServerMessageType {
     connected = 'connected',
     initBlocks = 'initBlocks',
     newBlock = 'newBlock',
-    health = 'health'
+    health = 'health',
 }
 
 export enum ClientMessageType {
     enterRooms = 'enterRooms',
     leaveRooms = 'leaveRooms',
     network = 'network',
-    health = 'health'
+    health = 'health',
 }
 
 export interface ReceivedServerInitValues {
@@ -25,7 +25,7 @@ export interface ReceivedServerInitValues {
         txs: Txs[];
     };
     [ServerMessageType.newBlock]: Block | undefined;
-    [ServerMessageType.health] : {status : number};
+    [ServerMessageType.health]: { status: number };
 }
 
 export const receivedServerInitValues: ReceivedServerInitValues = {
@@ -34,7 +34,7 @@ export const receivedServerInitValues: ReceivedServerInitValues = {
         txs: [],
     },
     [ServerMessageType.newBlock]: undefined,
-    [ServerMessageType.health]: {status : 3},
+    [ServerMessageType.health]: { status: 3 },
 };
 
 export interface ClientInitValues {
@@ -79,7 +79,7 @@ export interface Block {
     proposerName: string;
     txs: Txs[];
     hash: string;
-    parentHash : string;
+    parentHash: string;
 }
 
 export interface Txs {
@@ -94,6 +94,7 @@ export interface Txs {
     toName: string;
     value: string;
     gasUsed: string;
+    method: string;
 }
 
 export const instanceOfBlock = (object: any): object is Block => {

@@ -13,6 +13,10 @@ interface TableProps {
     title?: string;
     data: ReturnBlocks | ReturnTXS;
     table: Table[];
+
+    overridingStyle?: {
+        MainList?: React.CSSProperties;
+    };
 }
 
 interface Table {
@@ -21,13 +25,13 @@ interface Table {
     style?: React.CSSProperties;
 }
 
-const Index = ({ title, data, table }: TableProps) => {
+const Index = ({ title, data, table, overridingStyle }: TableProps) => {
     return (
         <div className={css.ListTemplate__common}>
             <header className={css.ListTemplate__header}>
                 <h2 className={css.ListTemplate__title}>{title || ''}</h2>
             </header>
-            <div className={css.MainList}>
+            <div className={css.MainList} style={overridingStyle?.MainList ? overridingStyle.MainList : undefined}>
                 <div className={css.ListTemplate__content__isMain}>
                     <div className={css.MainList__table}>
                         <div className={css.Table}>
@@ -237,7 +241,7 @@ const TableBody = ({ data, table }: TableProps) => {
                                                 style={{ width: `${row.width}%` }}
                                                 key={`${index}${idx}`}
                                             >
-                                                {''}
+                                                <span className={css.rewardData}>{item.method}</span>
                                             </div>
                                         );
                                     case TableTitle.txType:
@@ -254,10 +258,16 @@ const TableBody = ({ data, table }: TableProps) => {
                                         return (
                                             <div
                                                 className={css.Table__td}
-                                                style={{ ...row.style, width: `${row.width}%` }}
+                                                style={{
+                                                    ...row.style,
+                                                    width: `${row.width}%`,
+                                                }}
                                                 key={`${index}${idx}`}
                                             >
-                                                <span className={css.rewardData}>
+                                                <span
+                                                    className={css.rewardData}
+                                                    style={{ color: `${+item.value !== 0 && '#000'}` }}
+                                                >
                                                     {convertToKlayByFixed(+item.value + '')}
                                                 </span>
                                             </div>
